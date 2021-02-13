@@ -1,13 +1,10 @@
-from estimators.adaptive import Adaptive
-from estimators.histogram import Histogram
-from estimators.kernel import Kernel
-from estimators.nearest_neighbors import NN
-from estimators.real import Real
-from estimators.crude import Crude
-from estimators.known_formula import KnownFormula
+from experiment import Experiment
+from statistics import Statistics
 
 import scipy as sc
 import numpy as np
+
+from estimators.adaptive_histogram import AdaptiveHistogram
 
 """
 import numpy as np
@@ -27,28 +24,6 @@ import scipy.stats as ss
 from sklearn.neighbors import KernelDensity
 """
 
-def experiment_real_data(m, s, data):
-
-    estimators_data = {}
-    estimators_data['m'] = m
-    estimators_data['s'] = s
-    estimators_data['x'] = data
-    estimators_data['f'] = sc.stats.norm.pdf
-
-    results = {}
-
-    estimators = [KnownFormula, Real, Crude, Kernel, Histogram]
-    for e in estimators:
-        i = e(estimators_data)
-        r = i.estimate()
-        results[i.name] = r
-
-    return results
-
-def experiment_syntetic_data(m, s, samples):
-    syntetic_data = sc.stats.norm.rvs(m, s, samples)
-
-    return experiment_real_data(m, s, syntetic_data)
 
 def experiment_precision(m, s, min_points, max_points):
     columns = 10
@@ -70,15 +45,17 @@ def experiment_precision(m, s, min_points, max_points):
 def single_run():
     true_mean = -2
     true_std_deviation = 2
-    samples = 50
-    data = np.array([-1.82660529, 0.64771807, -4.20509891, -0.74107805, -2.20805863, 2.19241453, -4.02510552, -2.60194738, -2.68046854, -0.8404484, -0.13397538, -3.83246752, 3.95221818, -4.26073647, 1.85597412, -1.15097761, 1.26288319, -2.82723516, -1.63124305, -1.36638109, -2.41201203, -2.18363, -1.43593945, -2.96741991, -2.74393529, -2.04582359, -1.20286753, -1.85056239, -3.11808806, -3.36110253, -0.65306947, -0.61322476, -3.19488784, -1.89293271, 3.80140575, -3.44632189, 0.84791246, 1.5986561, -0.19150187, -1.98013888, -4.19964936, -2.00041118, 1.50903314, -1.80975716, -0.51805535, -2.31350719, -1.85560587, -2.50772003, -5.83904163, -1.9716374])
+    samples = 10000
 
-    results = experiment_real_data(true_mean, true_std_deviation, data)
+    #results = experiment(true_mean, true_std_deviation, data)
+    def f():
+        e = Experiment.from_syntetic_data(true_mean, true_std_deviation, samples, AdaptiveHistogram, {'bins': range(1, int(samples/2)), 'bin_population': range(1, int(samples/2))})
 
-    max_name_len = 2
-    for name in results.keys():
-        r = results[name]
-        print("H(X) ({}):\t{}{}".format(name, '\t' * (max_name_len-int(len(name)/8)), r))
+        return e.get_scores(method='log2')
+
+    s = Statistics(100, f)
+
+    print(s)
 
 def precision_run():
     import matplotlib.pyplot as plt

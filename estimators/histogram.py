@@ -8,8 +8,9 @@ class Histogram():
         self.name = 'hist'
 
     def estimate(self):
-        ys_freq, ys_hist = np.histogram(self.x, bins=self.bins)
+        ys_freq, ys_hist = np.histogram(self.x, bins=9)
         bin_size = ys_hist[1] - ys_hist[0]
+
         p_y = ys_freq / len(self.x)
 
         acc = 0
