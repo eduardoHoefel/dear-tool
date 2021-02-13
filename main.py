@@ -24,7 +24,6 @@ import scipy.stats as ss
 from sklearn.neighbors import KernelDensity
 """
 
-
 def experiment_precision(m, s, min_points, max_points):
     columns = 10
     step = 1000#int((max_points - min_points)/columns)
@@ -77,9 +76,11 @@ def precision_run():
     plt.legend()
     plt.show();
 
-def main():
-    single_run()
+def main(stdscr):
+    from gui.gui import Gui
+    Gui(stdscr)
 
 
 if __name__ == '__main__':
-    main()
+    from curses import wrapper
+    wrapper(main)
