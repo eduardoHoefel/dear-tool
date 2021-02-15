@@ -4,6 +4,9 @@ from estimators.estimator import Estimator
 
 class Real(Estimator):
 
+    def get_name():
+        return "Real"
+
     def get_parameters():
         return []
 

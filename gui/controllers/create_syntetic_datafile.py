@@ -27,6 +27,7 @@ class CreateSynteticDatafileController(WindowController):
         self.form.add_input('s', Input('Standard deviation', True, nfloat, 2))
 
         self.submitted = False
+        self.form.start()
 
     def render(self):
         super().render()

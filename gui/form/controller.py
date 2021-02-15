@@ -24,6 +24,9 @@ class FormController(WindowController, CursorManager):
 
         self.submit = Button("Submit", submit_window_provider, self.submit, Colors.SUCCESS)
 
+    def start(self):
+        self.input(None)
+
     def submit(self):
         data = self.get_data()
         self.on_submit(data)
@@ -36,8 +39,9 @@ class FormController(WindowController, CursorManager):
         return data
 
     def can_submit(self):
-        for p in self.inputs.values():
-            if not p.is_valid():
+        editable = self.interactible_cursor_options()
+        for p in self.inputs.keys():
+            if p in editable and not self.inputs[p].is_valid():
                 return False
         return True
 
@@ -79,6 +83,12 @@ class FormController(WindowController, CursorManager):
 
     def input(self, key):
         r = self.cursor_input(key)
+
+        if not r:
+            if key in ['KEY_ENTER', '\n']:
+                if self.can_submit():
+                    r = self.submit.input(key)
+
         if self.can_submit():
             self.submit.enable()
         else:

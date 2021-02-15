@@ -16,10 +16,10 @@ class ExecutionController(WindowController, CursorManager):
         self.executable = executable
 
         def back_window_provider(title):
-            return self.window.internal_renderer.popup(3, 4+len(title), 'bottom', title)
+            return self.window.internal_renderer.popup(3, 4+len("Back"), 'bottom', title)
 
         def visualize_window_provider(title):
-            return self.window.internal_renderer.popup(3, 4+len(title), 'bottom-right', title)
+            return self.window.internal_renderer.popup(3, 4+len("Visualize"), 'bottom-right', title)
 
         self.back = Button("Back", back_window_provider, self.on_back)
 
@@ -36,10 +36,7 @@ class ExecutionController(WindowController, CursorManager):
         if self.executable.finished is True:
             TaskController.remove()
 
-    def cursor_values(self):
-        return ['cancel', 'submit']
-
-    def cursor_options(self):
+    def interactible_cursor_options(self):
         return {'cancel': self.back, 'submit': self.visualize}
 
     def input(self, key):

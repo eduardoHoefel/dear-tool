@@ -17,6 +17,9 @@ def create_g_log(f, x, m, s):
 
 class KnownFormula(Estimator):
 
+    def get_name():
+        return "Known Formula"
+
     def get_parameters():
         return []
 

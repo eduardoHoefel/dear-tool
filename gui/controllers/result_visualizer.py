@@ -14,7 +14,7 @@ class ResultVisualizer(WindowController):
         self.document = DocumentViewer(self.results)
 
         def back_window_provider(title):
-            return self.window.internal_renderer.popup(3, 4+len(title), 'bottom', title)
+            return self.window.internal_renderer.popup(3, 4+len("Back"), 'bottom', title)
 
         self.back = Button("Back", back_window_provider, self.on_back)
 

@@ -22,6 +22,9 @@ class Input(FormObject):
         self.cursor = new_pos
 
     def handle_input(self, key):
+        if key is None:
+            return False
+
         if key in ['KEY_ENTER', '\n']:
             return False
 

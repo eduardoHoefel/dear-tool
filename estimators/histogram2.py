@@ -3,6 +3,9 @@ from estimators.estimator import Estimator
 
 class Histogram2(Estimator):
 
+    def get_name():
+        return "Manual Histogram"
+
     def get_parameters():
         return ['bins']
 

@@ -4,6 +4,9 @@ from estimators.estimator import Estimator
 
 class Crude(Estimator):
 
+    def get_name():
+        return "Crude"
+
     def get_parameters():
         return []
 

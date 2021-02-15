@@ -1,9 +1,6 @@
 
 class CursorManager():
 
-    def cursor_values(self):
-        return []
-
     def interactible_cursor_options(self):
         return {}
 

@@ -37,7 +37,16 @@ class EstimatorController(WindowController):
 
         self.form.add_input('datafile', datafile_select)
 
-        estimator_select = Select('Estimator', True, estimators.get_all)
+        def get_estimator_options():
+            keys = estimators.get_all()
+            options = {}
+            for key in keys:
+                options[key] = key.get_name()
+
+            return options
+
+
+        estimator_select = Select('Estimator', True, get_estimator_options)
         self.form.add_input('estimator', estimator_select)
 
         parameters = {}
@@ -59,7 +68,6 @@ class EstimatorController(WindowController):
                     parameters[p].show()
                     parameters[p].reset()
                     parameters[p].changed()
-            pass
 
         def on_bins_method_change(old_value, new_value, is_valid):
             if new_value == "manual":
@@ -88,6 +96,7 @@ class EstimatorController(WindowController):
         parameters['bins'].on_change(on_bins_change)
         parameters['bin_population'].on_change(on_population_change)
         on_estimator_change(None, None)
+        self.form.start()
 
 
 

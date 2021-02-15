@@ -4,6 +4,9 @@ from estimators.estimator import Estimator
 
 class NN(Estimator):
 
+    def get_name():
+        return "Neares Neighbors"
+
     def get_parameters():
         return []
 

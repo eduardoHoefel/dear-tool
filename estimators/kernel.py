@@ -4,6 +4,9 @@ from estimators.estimator import Estimator
 
 class Kernel(Estimator):
 
+    def get_name():
+        return "Kernel"
+
     def get_parameters():
         return ['kernel', 'bandwidth']
 
