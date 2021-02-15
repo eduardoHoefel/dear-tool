@@ -11,8 +11,8 @@ class Input(FormObject):
         self.required = required
         self.inp_type = inp_type
         self.default = default
-        self.value = str(default)
         self.cursor = 0
+        self.set_value(default)
 
     def move_cursor(self, pos):
         rv = self.get_printable_value()
@@ -23,7 +23,7 @@ class Input(FormObject):
             new_pos = 0
         self.cursor = new_pos
 
-    def input(self, key):
+    def handle_input(self, key):
         if key == 'KEY_LEFT':
             self.move_cursor(+1)
             return True
@@ -46,18 +46,21 @@ class Input(FormObject):
             return True
 
 
-        newvalue = self.value[:len(self.value) - self.cursor] + key + self.value[len(self.value) - self.cursor:]
-        if len(str(newvalue)) == 0:
+        new_value = self.value[:len(self.value) - self.cursor] + key + self.value[len(self.value) - self.cursor:]
+        if len(str(new_value)) == 0:
             self.cursor = 0
 
-        self.value = newvalue
+        self.value = new_value
         return True
 
     def get_printable_value(self):
         if self.focused:
-            return self.value
+            return str(self.value)
 
         return str(self.get_value())
+
+    def set_value(self, value):
+        self.value = str(value)
 
     def get_value(self):
         try:
@@ -83,9 +86,9 @@ class Input(FormObject):
         checked_str = "  " if valid_value else "  "
         required_str = "* " if self.required else "  "
         name_str = "{}: ".format(self.name)
-        name_color = Colors.EDITING_VALUE if self.focused else (Colors.VALID_VALUE if valid_value else Colors.INVALID_VALUE)
+        name_color = Colors.EDITING_VALUE if self.focused else (Colors.VALID_VALUE if valid_value else Colors.DISABLED if not self.enabled else Colors.INVALID_VALUE)
         value_color = Colors.DISABLED if not self.enabled else Colors.INVALID_VALUE if not valid_value else Colors.EDITING_VALUE if self.focused else Colors.DEFAULT
-        value_str = str(self.get_printable_value())
+        value_str = self.get_printable_value()
 
         checked_obj = LineObject(checked_str, 0, {'color': Colors.ERROR})
         required_obj = LineObject(required_str, len(checked_obj), {'color': Colors.IMPORTANT})
@@ -100,8 +103,8 @@ class Input(FormObject):
         line.add(name_obj)
 
         if self.focused:
-            value_p1 = value_str[:len(self.value) - self.cursor]
-            value_p2 = value_str[len(self.value) - self.cursor:]
+            value_p1 = value_str[:len(value_str) - self.cursor]
+            value_p2 = value_str[len(value_str) - self.cursor:]
 
             value_obj1 = LineObject(value_p1, len(padding_half)+len(name_obj), {'color': value_color})
             value_obj2 = LineObject(value_p2, len(value_obj1), {'color': value_color})

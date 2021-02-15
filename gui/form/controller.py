@@ -48,6 +48,7 @@ class FormController(WindowController, CursorManager):
 
     def cursor_values(self):
         cursor_values = list(self.inputs.keys())
+        cursor_values = [c for c in cursor_values if self.inputs[c].visible()]
         cursor_values.append('cancel')
         cursor_values.append('submit')
         return cursor_values

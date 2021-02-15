@@ -3,21 +3,23 @@ from estimators.estimator import Estimator
 
 class Histogram2(Estimator):
 
+    def get_parameters():
+        return ['bins']
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.bins = 'auto'
-        self.name = 'hist2'
+        self.bins = parameters['bins']
+        self.name = "HIST({})".format(self.bins)
 
     def estimate(self):
         max_v = max(self.x)
         min_v = min(self.x)
-        bins = 9
-        bin_size = (max_v - min_v) / bins
-        ys_freq = np.zeros(bins)
+        bin_size = (max_v - min_v) / self.bins
+        ys_freq = np.zeros(self.bins)
         ys_hist = []
-        for i in range(bins+1):
+        for i in range(self.bins+1):
             h_v = min_v + (i * bin_size)
             ys_hist.append(h_v)
 

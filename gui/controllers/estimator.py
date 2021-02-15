@@ -9,6 +9,8 @@ import estimators.all as estimators
 from gui.objects.executable import EstimatorExecutor
 from gui.controllers.execution import ExecutionController
 
+from datatypes import nfloat, nint, pfloat
+
 import log
 
 class EstimatorController(WindowController):
@@ -31,30 +33,59 @@ class EstimatorController(WindowController):
 
             return datafile_options
 
-        self.form.add_input('datafile', Select('Datafile', True, datafile_options_provider))
+        datafile_select = Select('Datafile', True, datafile_options_provider)
+
+        self.form.add_input('datafile', datafile_select)
 
         estimator_select = Select('Estimator', True, estimators.get_all)
         self.form.add_input('estimator', estimator_select)
 
         parameters = {}
-        parameters['bins'] = Input('Bins', False, int, 9)
-        parameters['bin_population'] = Input('Bin population', False, int, 9)
+        parameters['bins_method'] = Select('Bins method', True, {'manual': "Manual", 'auto': "Auto", 'fd': "Freedman Diacosis", 'doane': "Doane", 'scott': "Scott", 'stone': "Stone", 'rice': "Rice", 'sturges': "Sturges", 'sqrt': "Square root"})
+        parameters['bins'] = Input('Bins', False, nint, 9)
+        parameters['bin_population'] = Input('Bin population', False, nfloat, 9)
+        parameters['kernel'] = Select('Kernel', True, {'gaussian': "Gaussian"})
+        parameters['bandwidth'] = Input('Bandwidth', True, pfloat, 0.4)
 
         for p in parameters.keys():
             self.form.add_input(p, parameters[p])
 
-
-
-        def on_estimator_change(old_value, new_value):
+        def on_estimator_change(old_value, new_value, is_valid=True):
             for inp in parameters.values():
-                    inp.hide()
+                    inp.disappear()
 
             if new_value is not None:
                 for p in new_value.get_parameters():
                     parameters[p].show()
+                    parameters[p].changed()
             pass
 
+        def on_bins_method_change(old_value, new_value, is_valid):
+            if new_value == "manual":
+                parameters['bins'].reset()
+            else:
+                parameters['bins'].disable()
+                parameters['bins'].set_value("Disabled")
+
+        def on_bins_change(old_value, new_value, is_valid):
+            if is_valid:
+                datafile = datafile_select.get_value()
+                if datafile is not None:
+                    samples = datafile.samples
+                    parameters['bin_population'].set_value(samples/new_value)
+
+        def on_population_change(old_value, new_value, is_valid):
+            if is_valid:
+                datafile = datafile_select.get_value()
+                if datafile is not None:
+                    samples = datafile.samples
+                    parameters['bins'].set_value(int(samples/new_value))
+
+
         estimator_select.on_change(on_estimator_change)
+        parameters['bins_method'].on_change(on_bins_method_change)
+        parameters['bins'].on_change(on_bins_change)
+        parameters['bin_population'].on_change(on_population_change)
         on_estimator_change(None, None)
 
 

@@ -4,29 +4,22 @@ import gui.colors as Colors
 
 class Select(FormObject):
 
-    def __init__(self, name, required, options_provider, default=None):
+    def __init__(self, name, required, options, default=None):
         super().__init__()
         self.init_form_object()
         self.name = name
         self.required = required
         self.default = default
         self.cursor = default
-        self.options_provider = options_provider
+        if type(options) == dict:
+            def options_provider():
+                return options
+
+            self.options_provider = options_provider
+        else:
+            self.options_provider = options
         self.going_right = True
         self.on_change_do = None
-
-    def on_change(self, on_change_func):
-        self.on_change_do = on_change_func
-
-    def update_cursor(self, pos):
-        old_value = self.get_value()
-        self.move_cursor(pos)
-        new_value = self.get_value()
-
-        if old_value != new_value and self.on_change_do is not None:
-
-            self.on_change_do(old_value, new_value)
-            
 
     def move_cursor(self, pos):
         option_dict = self.options_provider()
@@ -38,10 +31,10 @@ class Select(FormObject):
             self.going_right = True
             return
 
-        if self.cursor is None and pos > 0:
-            self.cursor = 0
-            self.going_right = len(option_dict.keys()) > 1
-
+        if self.cursor is None:
+            if pos > 0:
+                self.cursor = 0
+                self.going_right = len(option_dict.keys()) > 1
             return
 
         new_pos = self.cursor + pos
@@ -57,18 +50,18 @@ class Select(FormObject):
 
         self.cursor = new_pos
 
-    def input(self, key):
+    def handle_input(self, key):
         if not self.enabled:
             return 
 
         if key == 'KEY_LEFT':
-            self.update_cursor(-1)
+            self.move_cursor(-1)
             return True
         if key == 'KEY_RIGHT':
-            self.update_cursor(+1)
+            self.move_cursor(+1)
             return True
         if key in ('KEY_BACKSPACE', '\b', '\x7f'):
-            self.update_cursor(None)
+            self.move_cursor(None)
             return True
 
         return False

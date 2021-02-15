@@ -3,12 +3,16 @@ from estimators.estimator import Estimator
 
 class Histogram(Estimator):
 
+    def get_parameters():
+        return ['bins_method', 'bins']
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.bins = 'auto'
-        self.name = 'hist'
+        self.bins_method = parameters['bins_method']
+        self.bins = parameters['bins'] if bins_method == 'manual' else bins_method
+        self.name = "HIST({})".format(self.bins)
 
     def estimate(self):
         ys_freq, ys_hist = np.histogram(self.x, bins=9)

@@ -8,7 +8,7 @@ from estimators.real import Real
 
 from datafiles.syntetic import SynteticDatafile
 
-from datatypes.positive_float import pfloat
+from datatypes import myfloat, nfloat
 
 import log
 
@@ -23,8 +23,8 @@ class CreateSynteticDatafileController(WindowController):
 
         self.form = FormController(window_provider, self.remove, self.submit)
         self.form.add_input('samples', Input('Samples', True, int, 1500))
-        self.form.add_input('m', Input('Mean', True, float, -2))
-        self.form.add_input('s', Input('Standard deviation', True, pfloat, 2))
+        self.form.add_input('m', Input('Mean', True, myfloat, -2))
+        self.form.add_input('s', Input('Standard deviation', True, nfloat, 2))
 
         self.submitted = False
 

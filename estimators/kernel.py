@@ -4,12 +4,15 @@ from estimators.estimator import Estimator
 
 class Kernel(Estimator):
 
+    def get_parameters():
+        return ['kernel', 'bandwidth']
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.kernel = 'gaussian'
-        self.bandwidth = 0.4
+        self.kernel = parameters['kernel']
+        self.bandwidth = parameters['bandwidth']
         self.name = "KDE({}, {})".format(self.kernel, self.bandwidth)
 
     def estimate(self):

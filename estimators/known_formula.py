@@ -17,6 +17,9 @@ def create_g_log(f, x, m, s):
 
 class KnownFormula(Estimator):
 
+    def get_parameters():
+        return []
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 

@@ -10,16 +10,9 @@ class AdaptiveHistogram(Estimator):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
+        self.bins = parameters['bins']
+        self.bin_population = parameters['bin_population']
 
-        self.bins = 9
-        self.bin_population = int(len(self.x) / self.bins)
-
-        if 'bins' in parameters and parameters['bins'] != None:
-            self.bins = parameters['bins']
-            self.bin_population = int(len(self.x) / self.bins)
-        if 'bin_population' in parameters and parameters['bin_population'] != None:
-            self.bin_population = parameters['bin_population']
-            self.bins = int(len(self.x) / self.bin_population)
         self.name = "AH({}, {})".format(int(self.bins), int(self.bin_population))
 
     def estimate(self):
