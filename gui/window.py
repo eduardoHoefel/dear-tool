@@ -34,10 +34,9 @@ class Renderer():
         rectangle(self.win, self.begin_y, self.begin_x, self.end_y, self.end_x)
 
         if options is not None:
-            for k in options:
-                if k == 'merge_top_borders':
-                    self.addstr(0, 0, "├")
-                    self.addstr(0, self.width-1, "┤")
+            if 'merge_top_borders' in options:
+                self.addstr(0, 0, "├")
+                self.addstr(0, self.width-1, "┤")
         #self.win.addstr(self.end_y, self.begin_x, "{} [{}, {}, {}, {}]({}x{})".format(self.name, self.begin_y, self.end_y, self.begin_x, self.end_x, self.height, self.width))
 
     def popup(self, height, width, pos, title):

@@ -5,12 +5,10 @@ import gui.colors as Colors
 class Select(FormObject):
 
     def __init__(self, name, required, options, default=None):
-        super().__init__()
-        self.init_form_object()
+        self.init_form_object(default)
         self.name = name
         self.required = required
-        self.default = default
-        self.cursor = default
+
         if type(options) == dict:
             def options_provider():
                 return options
@@ -18,8 +16,11 @@ class Select(FormObject):
             self.options_provider = options_provider
         else:
             self.options_provider = options
+
         self.going_right = True
-        self.on_change_do = None
+
+    def set_value(self, value):
+        self.cursor = value
 
     def move_cursor(self, pos):
         option_dict = self.options_provider()

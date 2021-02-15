@@ -5,14 +5,12 @@ import gui.colors as Colors
 class Input(FormObject):
 
     def __init__(self, name, required, inp_type, default=None):
-        super().__init__()
-        self.init_form_object()
+        self.init_form_object(default)
         self.name = name
         self.required = required
         self.inp_type = inp_type
-        self.default = default
         self.cursor = 0
-        self.set_value(default)
+        self.reset()
 
     def move_cursor(self, pos):
         rv = self.get_printable_value()
@@ -24,6 +22,9 @@ class Input(FormObject):
         self.cursor = new_pos
 
     def handle_input(self, key):
+        if key in ['KEY_ENTER', '\n']:
+            return False
+
         if key == 'KEY_LEFT':
             self.move_cursor(+1)
             return True
@@ -31,6 +32,9 @@ class Input(FormObject):
             self.move_cursor(-1)
             return True
         if key in ('KEY_BACKSPACE', '\b', '\x7f'):
+            if self.cursor == len(self.value):
+                return False
+
             aux = list(self.value)
             del aux[-(1+self.cursor)]
             self.value = "".join(aux)

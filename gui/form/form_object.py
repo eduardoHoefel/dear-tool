@@ -1,16 +1,19 @@
 
 class FormObject():
 
-    def init_form_object(self):
+    def init_form_object(self, default=None):
+        self.default = default
         self.on_change_do = None
-        self.default = None
         self.unfocus()
         self.reset()
 
     def reset(self):
-        self.value = self.default
+        self.set_value(self.default)
         self.enable()
         self.show()
+
+    def set_value(self, value):
+        pass
 
     def focus(self):
         self.focused = True

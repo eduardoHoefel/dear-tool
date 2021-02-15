@@ -1,6 +1,7 @@
 from gui.tools import Menu
 from gui.controllers.window_controller import WindowController
 from gui.controllers.estimator import EstimatorController
+import gui.colors as Colors
 
 class MainMenu(WindowController):
 
@@ -14,7 +15,7 @@ class MainMenu(WindowController):
         title.append("█████╔╝       ███████╗          ██║  ██║           ██║")
         title.append("╚════╝ ensity ╚══════╝stimators ╚═╝  ╚═╝esearch in ╚═╝ython ")
 
-        super().__init__(title, window_provider, window_render_options=['merge_top_borders'])
+        super().__init__(title, window_provider, window_render_options={'merge_top_borders': True, 'color': Colors.BIG_TITLE})
         self.menu = Menu()
         self.menu.add_option('d', 'Density estimator', self.estimator)
         self.menu.add_option('e', 'Experiment', self.experiment)

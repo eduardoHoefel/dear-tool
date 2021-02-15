@@ -2,6 +2,7 @@ from gui.form.button import Button
 from gui.controllers.window_controller import WindowController
 from gui.window import Renderer
 from gui.objects.cursor_manager import CursorManager
+import gui.colors as Colors
 
 class FormController(WindowController, CursorManager):
 
@@ -12,16 +13,16 @@ class FormController(WindowController, CursorManager):
         self.cursor = 'cancel'
 
         def cancel_window_provider(title):
-            return self.window.popup(3, 4+len(title), 'bottom', title)
+            return self.window.popup(3, 4+len("Cancel"), 'bottom', title)
 
 
         def submit_window_provider(title):
-            return self.window.popup(3, 4+len(title), 'bottom-right', title)
+            return self.window.popup(3, 4+len("Button"), 'bottom-right', title)
 
 
         self.cancel = Button("Cancel", cancel_window_provider, on_cancel)
 
-        self.submit = Button("Submit", submit_window_provider, self.submit)
+        self.submit = Button("Submit", submit_window_provider, self.submit, Colors.SUCCESS)
 
     def submit(self):
         data = self.get_data()
@@ -46,6 +47,16 @@ class FormController(WindowController, CursorManager):
         if self.cursor == 'cancel':
             self.move_cursor(-1)
 
+    def interactible_cursor_options(self):
+        cursor_options = self.renderable_cursor_options()
+        interactible_keys = [k for k in cursor_options.keys() if cursor_options[k].enabled]
+        options = {}
+        for key in interactible_keys:
+            options[key] = cursor_options[key]
+
+        return options
+
+
     def cursor_values(self):
         cursor_values = list(self.inputs.keys())
         cursor_values = [c for c in cursor_values if self.inputs[c].visible()]
@@ -53,7 +64,7 @@ class FormController(WindowController, CursorManager):
         cursor_values.append('submit')
         return cursor_values
 
-    def cursor_options(self):
+    def renderable_cursor_options(self):
         options = {}
         keys = self.cursor_values()
         for key in keys:
@@ -67,12 +78,18 @@ class FormController(WindowController, CursorManager):
         return options
 
     def input(self, key):
-        return self.cursor_input(key)
+        r = self.cursor_input(key)
+        if self.can_submit():
+            self.submit.enable()
+        else:
+            self.submit.disable()
+
+        return r
 
     def render(self):
         renderer = self.window
 
-        tbr = self.cursor_options()
+        tbr = self.renderable_cursor_options()
 
         tbr_original = self.cursor_values()
         tbr_order = self.cursor_values()

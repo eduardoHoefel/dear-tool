@@ -57,6 +57,7 @@ class EstimatorController(WindowController):
             if new_value is not None:
                 for p in new_value.get_parameters():
                     parameters[p].show()
+                    parameters[p].reset()
                     parameters[p].changed()
             pass
 

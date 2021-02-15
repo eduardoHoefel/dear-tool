@@ -11,7 +11,7 @@ class Histogram(Estimator):
 
         self.x = datafile.data
         self.bins_method = parameters['bins_method']
-        self.bins = parameters['bins'] if bins_method == 'manual' else bins_method
+        self.bins = parameters['bins'] if self.bins_method == 'manual' else self.bins_method
         self.name = "HIST({})".format(self.bins)
 
     def estimate(self):
