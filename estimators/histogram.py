@@ -3,7 +3,7 @@ from estimators.estimator import Estimator
 
 class Histogram(Estimator):
 
-    def __init__(self, datafile, parameters):
+    def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data

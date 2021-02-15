@@ -1,5 +1,6 @@
 import curses
 from curses.textpad import Textbox, rectangle
+import gui.colors as Colors
 
 class Renderer():
 
@@ -16,8 +17,14 @@ class Renderer():
         self.win = parent.win
         self.name = "Renderer"
 
-    def addstr(self, pos_y, pos_x, text):
-        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text))
+    def addstr(self, pos_y, pos_x, text, options=None):
+        color = Colors.DEFAULT
+        if options is not None:
+            if 'color' in options:
+                color = options['color']
+
+        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color))
+        return pos_x + len(str(text))
 
     def clear(self):
         for i in range(self.height):
@@ -64,10 +71,30 @@ class Window(Renderer):
         super().render(options)
         if self.title is not None:
             if type(self.title) == str:
-                self.addstr(1, 2, self.title)
+                self.addstr(1, 2, self.title, options)
             if type(self.title) == list:
                 for i in range(len(self.title)):
                     line = self.title[i]
-                    self.addstr(i+1, 2, line)
+                    self.addstr(i+1, 2, line, options)
 
+class LineObject():
 
+    def __init__(self, text, pos, options=None):
+        self.text = str(text)
+        self.pos = pos
+        self.options = options
+
+    def __len__(self):
+        return len(self.text) + self.pos
+
+class Line():
+
+    def __init__(self):
+        self.objects = []
+
+    def add(self, line_object):
+        self.objects.append(line_object)
+
+    def render(self, renderer):
+        for x in self.objects:
+            renderer.addstr(0, x.pos, x.text, x.options)

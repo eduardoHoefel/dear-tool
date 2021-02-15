@@ -1,4 +1,6 @@
 from gui.form.form_object import FormObject
+from gui.window import Line, LineObject
+import gui.colors as Colors
 
 class Input(FormObject):
 
@@ -13,7 +15,7 @@ class Input(FormObject):
         self.cursor = 0
 
     def move_cursor(self, pos):
-        rv = self.get_renderable_value()
+        rv = self.get_printable_value()
         new_pos = self.cursor + pos
         if new_pos >= len(rv):
             new_pos = len(rv)
@@ -29,14 +31,29 @@ class Input(FormObject):
             self.move_cursor(-1)
             return True
         if key in ('KEY_BACKSPACE', '\b', '\x7f'):
-            self.value = self.value[:-1]
+            aux = list(self.value)
+            del aux[-(1+self.cursor)]
+            self.value = "".join(aux)
+            return True
+        if key  == 'KEY_DC':
+            if self.cursor == 0:
+                return False
+
+            aux = list(self.value)
+            del aux[-self.cursor]
+            self.value = "".join(aux)
+            self.cursor -= 1
             return True
 
+
         newvalue = self.value[:len(self.value) - self.cursor] + key + self.value[len(self.value) - self.cursor:]
+        if len(str(newvalue)) == 0:
+            self.cursor = 0
+
         self.value = newvalue
         return True
 
-    def get_renderable_value(self):
+    def get_printable_value(self):
         if self.focused:
             return self.value
 
@@ -46,7 +63,7 @@ class Input(FormObject):
         try:
             return self.inp_type(self.value)
         except:
-            return self.default
+            return self.value
 
     def is_valid(self):
         try:
@@ -59,29 +76,41 @@ class Input(FormObject):
         if not self.visible():
             return self.hidden()
 
-        if self.is_valid():
-            checked_str = " "
-        else:
-            checked_str = "×"
+        valid_value = self.is_valid()
 
-        value_str = self.get_renderable_value()
+        line = Line()
 
-        required_str = "*" if self.required else " "
+        checked_str = "  " if valid_value else "  "
+        required_str = "* " if self.required else "  "
+        name_str = "{}: ".format(self.name)
+        name_color = Colors.EDITING_VALUE if self.focused else (Colors.VALID_VALUE if valid_value else Colors.INVALID_VALUE)
+        value_color = Colors.DISABLED if not self.enabled else Colors.INVALID_VALUE if not valid_value else Colors.EDITING_VALUE if self.focused else Colors.DEFAULT
+        value_str = str(self.get_printable_value())
 
-        left_part = "{} {}{}: ".format(checked_str, required_str, self.name)
+        checked_obj = LineObject(checked_str, 0, {'color': Colors.ERROR})
+        required_obj = LineObject(required_str, len(checked_obj), {'color': Colors.IMPORTANT})
+        name_obj = LineObject(name_str, len(required_obj), {'color': name_color})
 
+        space_left = renderer.width - len(name_obj)
+        padding_length = space_left - len(value_str)
+        padding_half = " " *  int(padding_length/2+.5)
+
+        line.add(checked_obj)
+        line.add(required_obj)
+        line.add(name_obj)
 
         if self.focused:
-            right_part_1 = value_str[:len(value_str)-self.cursor]
-            right_part_2 = value_str[len(value_str)-self.cursor:]
+            value_p1 = value_str[:len(self.value) - self.cursor]
+            value_p2 = value_str[len(self.value) - self.cursor:]
 
-            left_part += right_part_1
-            renderer.addstr(0, len(left_part), right_part_2)
-            renderer.addstr(0, 0, left_part)
+            value_obj1 = LineObject(value_p1, len(padding_half)+len(name_obj), {'color': value_color})
+            value_obj2 = LineObject(value_p2, len(value_obj1), {'color': value_color})
+            line.add(value_obj2)
+            line.add(value_obj1)
         else:
-            padding = " " * (renderer.width - len(left_part) - len(value_str) - 1)
-            right_part = padding + value_str
+            value_obj = LineObject(value_str, renderer.width - len(value_str), {'color': value_color})
+            line.add(value_obj)
 
-            renderer.addstr(0, 0, left_part + right_part)
+        line.render(renderer)
 
         return True

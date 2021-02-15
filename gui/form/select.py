@@ -1,4 +1,6 @@
 from gui.form.form_object import FormObject
+from gui.window import Line, LineObject
+import gui.colors as Colors
 
 class Select(FormObject):
 
@@ -11,6 +13,20 @@ class Select(FormObject):
         self.cursor = default
         self.options_provider = options_provider
         self.going_right = True
+        self.on_change_do = None
+
+    def on_change(self, on_change_func):
+        self.on_change_do = on_change_func
+
+    def update_cursor(self, pos):
+        old_value = self.get_value()
+        self.move_cursor(pos)
+        new_value = self.get_value()
+
+        if old_value != new_value and self.on_change_do is not None:
+
+            self.on_change_do(old_value, new_value)
+            
 
     def move_cursor(self, pos):
         option_dict = self.options_provider()
@@ -22,10 +38,9 @@ class Select(FormObject):
             self.going_right = True
             return
 
-        if self.cursor is None:
-            if pos > 0:
-                self.cursor = 0
-                self.going_right = True
+        if self.cursor is None and pos > 0:
+            self.cursor = 0
+            self.going_right = len(option_dict.keys()) > 1
 
             return
 
@@ -43,14 +58,17 @@ class Select(FormObject):
         self.cursor = new_pos
 
     def input(self, key):
+        if not self.enabled:
+            return 
+
         if key == 'KEY_LEFT':
-            self.move_cursor(-1)
+            self.update_cursor(-1)
             return True
         if key == 'KEY_RIGHT':
-            self.move_cursor(+1)
+            self.update_cursor(+1)
             return True
         if key in ('KEY_BACKSPACE', '\b', '\x7f'):
-            self.move_cursor(None)
+            self.update_cursor(None)
             return True
 
         return False
@@ -81,43 +99,51 @@ class Select(FormObject):
             return self.hidden()
 
         option_dict = self.options_provider()
+        valid_value = self.is_valid()
 
-        if self.is_valid():
-            checked_str = " "
-        else:
-            checked_str = "×"
+        line = Line()
 
+        checked_str = "  " if valid_value else "  "
+        required_str = "* " if self.required else "  "
+        name_str = "{}: ".format(self.name)
+        name_color = Colors.EDITING_VALUE if self.focused else (Colors.VALID_VALUE if valid_value else Colors.INVALID_VALUE)
+        value_color = Colors.DISABLED if not self.enabled else Colors.INVALID_VALUE if not valid_value else Colors.EDITING_VALUE if self.focused else Colors.DEFAULT
         value_str = str(self.get_printable_value())
+        left_symbol = "<" if self.enabled and self.cursor is not None else " "
+        right_symbol = ">" if self.enabled and len(option_dict.keys()) > 0 and (self.cursor is None or self.cursor < (len(option_dict.keys())-1)) else " "
 
-        required_str = "*" if self.required else " "
+        checked_obj = LineObject(checked_str, 0, {'color': Colors.ERROR})
+        required_obj = LineObject(required_str, len(checked_obj), {'color': Colors.IMPORTANT})
+        name_obj = LineObject(name_str, len(required_obj), {'color': name_color})
 
-        left_part = "{} {}{}: ".format(checked_str, required_str, self.name)
+        space_left = renderer.width - len(name_obj)
+        padding_length = space_left - len(value_str)
+        padding_half = " " *  int(padding_length/2-.5)
+        padding_half2 = " " * int(padding_length/2-1)
 
+        line.add(checked_obj)
+        line.add(required_obj)
 
         if self.focused:
-            left_symbol = "<" if self.cursor is not None else " "
-            right_symbol = ">" if len(option_dict.keys()) > 0 and (self.cursor is None or self.cursor < (len(option_dict.keys())-1)) else " "
-
-            padding_length = (renderer.width - len(left_part) - len(value_str) - 2)
-            padding_half = " " * int(padding_length/2)
-            padding_half2 = " " * int((padding_length+1)/2)
+            left_symbol_obj = LineObject(left_symbol, len(name_obj), {'color': Colors.PRESSABLE})
+            value_obj = LineObject(padding_half+value_str+padding_half2, len(left_symbol_obj), {'color': value_color})
+            right_symbol_obj = LineObject(right_symbol, len(value_obj), {'color': Colors.PRESSABLE})
 
             if self.going_right:
-                right_part_1 = "{}{}{}{}".format(left_symbol, padding_half, value_str, padding_half2)
-                right_part_2 = right_symbol
-
-                left_part += right_part_1
-                renderer.addstr(0, len(left_part), right_part_2)
-                renderer.addstr(0, 0, left_part)
+                line.add(name_obj)
+                line.add(left_symbol_obj)
+                line.add(right_symbol_obj)
+                line.add(value_obj)
             else:
-                right_part = "{}{}{}{}{}".format(left_symbol, padding_half, value_str, padding_half2, right_symbol)
-
-                renderer.addstr(0, len(left_part), right_part)
-                renderer.addstr(0, 0, left_part)
+                line.add(right_symbol_obj)
+                line.add(value_obj)
+                line.add(left_symbol_obj)
+                line.add(name_obj)
         else:
-            padding = " " * (renderer.width - len(left_part) - len(value_str) - 1)
-            right_part = padding + value_str
+            line.add(name_obj)
+            value_obj = LineObject(value_str, renderer.width - len(value_str), {'color': value_color})
+            line.add(value_obj)
 
-            renderer.addstr(0, 0, left_part + right_part)
+        line.render(renderer)
 
         return True

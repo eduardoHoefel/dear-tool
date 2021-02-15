@@ -1,3 +1,6 @@
+from estimators.analysis import EstimationAnalysis
+import numpy as np
+
 class TextAdjuster():
     def __init__(self, width):
         self.width = width
@@ -12,7 +15,10 @@ class Document():
         if text is not None:
             self.append("", text)
 
-    def append(self, left_part, right_part):
+    def append(self, left_part, right_part=""):
+        if type(right_part) in [float, np.float64]:
+            right_part = "{:.8f}".format(right_part)
+
         self.text_parts.append((str(left_part), str(right_part)))
 
     def print(self, adjuster):
@@ -28,14 +34,20 @@ class DensityEstimationResultDocument(Document):
         super().__init__()
 
         datafile = estimator.datafile
-        result = str(result)
-        self.append("Density Estimation: ", result)
         if datafile.m is not None:
-            self.append("\nKnown mean: ", datafile.m)
+            self.append("Known mean: ", datafile.m)
         if datafile.s is not None:
-            self.append("\nKnown std deviation: ", datafile.s)
+            self.append("Known std deviation: ", datafile.s)
         if datafile.density is not None:
-            self.append("\nKnown density: ", datafile.density)
+            self.append("Known density: ", datafile.density)
+
+        self.append("\n")
+        self.append("Density Estimation: ", result)
+        if datafile.density is not None:
+            review = EstimationAnalysis(result, datafile.density)
+            self.append("Error (raw): ", review.raw)
+            self.append("Error (relative): ", review.relative)
+            self.append("Score: ", review.score)
 
 class DocumentViewer():
 

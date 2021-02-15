@@ -33,7 +33,30 @@ class EstimatorController(WindowController):
 
         self.form.add_input('datafile', Select('Datafile', True, datafile_options_provider))
 
-        self.form.add_input('estimator', Select('Estimator', True, estimators.get_all))
+        estimator_select = Select('Estimator', True, estimators.get_all)
+        self.form.add_input('estimator', estimator_select)
+
+        parameters = {}
+        parameters['bins'] = Input('Bins', False, int, 9)
+        parameters['bin_population'] = Input('Bin population', False, int, 9)
+
+        for p in parameters.keys():
+            self.form.add_input(p, parameters[p])
+
+
+
+        def on_estimator_change(old_value, new_value):
+            for inp in parameters.values():
+                    inp.hide()
+
+            if new_value is not None:
+                for p in new_value.get_parameters():
+                    parameters[p].show()
+            pass
+
+        estimator_select.on_change(on_estimator_change)
+        on_estimator_change(None, None)
+
 
 
     def input(self, key):
@@ -52,8 +75,9 @@ class EstimatorController(WindowController):
     def submit(self, data):
         datafile = data['datafile']
         Estimator = data['estimator']
+        parameters = data
 
-        estimator = Estimator(datafile)
+        estimator = Estimator(datafile, parameters)
         execution = EstimatorExecutor(estimator)
 
         def get_window(title):

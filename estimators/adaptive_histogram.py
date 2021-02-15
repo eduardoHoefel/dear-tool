@@ -3,6 +3,9 @@ from estimators.estimator import Estimator
 
 class AdaptiveHistogram(Estimator):
 
+    def get_parameters():
+        return ['bins', 'bin_population']
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
 
