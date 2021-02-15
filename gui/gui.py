@@ -3,9 +3,10 @@ import curses
 READY = 0
 RUNNING = 1
 
-from gui.controllers import MainMenu
-from gui.controllers import QuickActionsMenu
+from gui.controllers.main import MainMenu
+from gui.controllers.quick_actions import QuickActionsMenu
 from gui.window import Window
+from storage import Storage
 
 class Gui():
 
@@ -16,15 +17,23 @@ class Gui():
 
         self.height -= 1
 
+        self.s = Storage()
+
         self.win = stdscr
         curses.use_default_colors()
         stdscr.clear()
 
-        main_window = Window(-2, 0, 2, 0, self)
-        quick_actions_window = Window(3, 0, 0, 0, self)
+        def main_window(title):
+            return Window(title, -2, 0, 2, 0, self)
 
-        self.main = MainMenu(main_window, None)
-        self.quick_actions = QuickActionsMenu(quick_actions_window, self.quit)
+        def quick_actions(title):
+            return Window(title, 3, 0, 0, 0, self)
+
+        main = MainMenu(main_window)
+        self.quick_actions = QuickActionsMenu(quick_actions, main.window)
+
+        self.windows = [self.quick_actions, main]
+
         self.running = True
 
         while self.running:
@@ -35,19 +44,34 @@ class Gui():
         self.running = False
 
     def tick(self):
+        current_task = self.s.get('task')
+        if current_task is not None:
+            current_task()
+            return
+
         c = self.win.getkey()
-        r = self.main.input(c)
+
+        r = self.windows[-1].input(c)
         if not r:
-            self.quick_actions.input(c)
+            self.windows[0].input(c)
+
+        new_window = self.s.get('new_window')
+        if new_window is not None:
+            self.windows.append(new_window)
+            self.s.set('new_window', None)
+
+        remove_window = self.s.get('remove_window')
+        if remove_window is not None:
+            self.windows.remove(remove_window)
+            self.s.set('remove_window', None)
+            if remove_window == self.quick_actions:
+                self.running = False
 
     def render(self):
         self.win.clear()
-        self.main.render()
-        self.quick_actions.render()
+        for w in self.windows:
+            w.render()
         self.refresh()
-
-    def addstr(self, pos_y, pos_x, text):
-        self.win.addstr(pos_y, pos_x, text)
 
     def refresh(self):
         self.win.refresh()

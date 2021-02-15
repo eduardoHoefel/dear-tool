@@ -1,19 +1,22 @@
 import numpy as np
+from estimators.estimator import Estimator
 
-class AdaptiveHistogram():
+class AdaptiveHistogram(Estimator):
 
-    def __init__(self, data):
-        self.x = data['x']
+    def __init__(self, datafile, parameters={}):
+        super().__init__(datafile, parameters)
+
+        self.x = datafile.data
 
         self.bins = 9
-        self.bin_population = int(len(data['x']) / self.bins)
+        self.bin_population = int(len(self.x) / self.bins)
 
-        if 'bins' in data and data['bins'] != None:
-            self.bins = data['bins']
-            self.bin_population = int(len(data['x']) / self.bins)
-        if 'bin_population' in data and data['bin_population'] != None:
-            self.bin_population = data['bin_population']
-            self.bins = int(len(data['x']) / self.bin_population)
+        if 'bins' in parameters and parameters['bins'] != None:
+            self.bins = parameters['bins']
+            self.bin_population = int(len(self.x) / self.bins)
+        if 'bin_population' in parameters and parameters['bin_population'] != None:
+            self.bin_population = parameters['bin_population']
+            self.bins = int(len(self.x) / self.bin_population)
         self.name = "AH({}, {})".format(int(self.bins), int(self.bin_population))
 
     def estimate(self):

@@ -1,10 +1,13 @@
 import numpy as np
 from sklearn.neighbors import KernelDensity
+from estimators.estimator import Estimator
 
-class Kernel:
+class Kernel(Estimator):
 
-    def __init__(self, data):
-        self.x = data['x']
+    def __init__(self, datafile, parameters={}):
+        super().__init__(datafile, parameters)
+
+        self.x = datafile.data
         self.kernel = 'gaussian'
         self.bandwidth = 0.4
         self.name = "KDE({}, {})".format(self.kernel, self.bandwidth)

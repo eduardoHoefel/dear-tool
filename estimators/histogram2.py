@@ -1,9 +1,12 @@
 import numpy as np
+from estimators.estimator import Estimator
 
-class Histogram2():
+class Histogram2(Estimator):
 
-    def __init__(self, data):
-        self.x = data['x']
+    def __init__(self, datafile, parameters={}):
+        super().__init__(datafile, parameters)
+
+        self.x = datafile.data
         self.bins = 'auto'
         self.name = 'hist2'
 

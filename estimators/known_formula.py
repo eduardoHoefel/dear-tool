@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sc
+from estimators.estimator import Estimator
 
 def create_g_log(f, x, m, s):
     g = lambda x:f(x, m, s)
@@ -14,13 +15,15 @@ def create_g_log(f, x, m, s):
 
     return g_log
 
-class KnownFormula():
+class KnownFormula(Estimator):
 
-    def __init__(self, data):
-        f = data['f']
-        x = data['x']
-        m = data['m']
-        s = data['s']
+    def __init__(self, datafile, parameters={}):
+        super().__init__(datafile, parameters)
+
+        x = datafile.data
+        f = datafile.f
+        m = datafile.m
+        s = datafile.s
 
         self.g_log = create_g_log(f, x, m, s)
         self.name = "known"
