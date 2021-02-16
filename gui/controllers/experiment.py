@@ -5,11 +5,14 @@ from gui.form.controller import FormController
 from gui.form.input import Input
 from gui.form.select import Select
 from gui.form.section import Section
+from gui.form.range_section import RangeSection
 from gui.form.double_section import DoubleSection
 from gui.form.section_break import SectionBreak
 
-import estimators.all as estimators
-from gui.objects.executable import EstimatorExecutor
+import estimators.all as Estimators
+
+from experiment import Experiment
+from executors.executable import ExperimentExecutor
 from gui.controllers.execution import ExecutionController
 
 from datatypes import nfloat, nint, pfloat
@@ -41,10 +44,12 @@ class ExperimentController(WindowController):
         self.form.add_element('datafile', datafile_select)
 
         def get_estimator_options():
-            keys = estimators.get_all()
+            keys = Estimators.get_all()
             options = {}
             for key in keys:
                 options[key] = key.get_name()
+
+            options['all'] = "All"
 
             return options
 
@@ -53,9 +58,9 @@ class ExperimentController(WindowController):
         self.form.add_element('estimator', estimator_select)
         self.form.add_element('break1', SectionBreak())
 
-        min_parameters = estimators.get_all_inputs(datafile_select)
-        max_parameters = estimators.get_all_inputs(datafile_select)
-        names = estimators.get_all_input_names()
+        min_parameters = Estimators.get_all_inputs(datafile_select)
+        max_parameters = Estimators.get_all_inputs(datafile_select)
+        names = Estimators.get_all_input_names()
 
         simple_parameters = ['bins_method', 'kernel']
         range_parameters = ['bins', 'bin_population', 'bandwidth']
@@ -63,11 +68,7 @@ class ExperimentController(WindowController):
             self.form.add_element(p, Section(names[p], min_parameters[p]))
 
         for p in range_parameters:
-            #range_step = Input(True, pfloat, 1)
-            #self.form.add_input(p + "_step", Section(names[p] + " step", range_step))
-            section1 = Section("From", min_parameters[p])
-            section2 = Section("To", max_parameters[p])
-            self.form.add_element(p, DoubleSection(section1, section2))
+            self.form.add_element(p, RangeSection(names[p], min_parameters[p], max_parameters[p]))
 
         def on_estimator_change(old_value, new_value, is_valid=True):
             for inp in min_parameters.values():
@@ -107,11 +108,11 @@ class ExperimentController(WindowController):
     def submit(self):
         data = self.form.get_data()
         datafile = data['datafile']
-        Estimator = data['estimator']
+        EstimatorClass = data['estimator']
         parameters = data
 
-        estimator = Estimator(datafile, parameters)
-        execution = EstimatorExecutor(estimator)
+        experiment = Experiment(EstimatorClass, datafile, parameters)
+        execution = ExperimentExecutor(experiment)
 
         def get_window(title):
             return self.window.internal_renderer.popup(10, 45, 'center', title)

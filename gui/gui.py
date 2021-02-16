@@ -8,12 +8,17 @@ from gui.controllers.quick_actions import QuickActionsMenu
 from gui.window import Window
 from storage import Storage
 
+import time
+
 class Gui():
 
     def __init__(self, stdscr):
         self.height, self.width = stdscr.getmaxyx()
         self.begin_y = 0
         self.begin_x = 0
+        self.fps = 60
+        self.update_frequency = 1/self.fps
+        self.last_render = None
 
         self.height -= 1
 
@@ -73,10 +78,16 @@ class Gui():
                 self.running = False
 
     def render(self):
+        cur_time = time.time()
+        if self.last_render is not None and (cur_time - self.last_render) < self.update_frequency:
+            return
+
         self.win.clear()
         for w in self.windows:
             w.render()
         self.refresh()
+
+        self.last_render = time.time()
 
     def refresh(self):
         self.win.refresh()

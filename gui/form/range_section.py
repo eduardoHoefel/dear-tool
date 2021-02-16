@@ -2,20 +2,29 @@ from gui.form.form_object import FormObject
 from gui.window import Line, LineObject
 import gui.colors as Colors
 from gui.window import Renderer
-from gui.objects.cursors.hcycle import HCycleCursor
-import gui.objects.keys as Keys
+from gui.objects.cursors.vlist import VListCursor
+from gui.form.double_section import DoubleSection
+from gui.form.section import Section
+from gui.form.input import Input
+from datatypes import pfloat
 
-class DoubleSection(FormObject):
+class RangeSection(FormObject):
 
-    def __init__(self, section1, section2):
-        self.sections = {0: section1, 1: section2}
-        self.cursor = HCycleCursor(self.sections)
-        self.init_form_object(section1.default)
-        self.cursor.set_filter(self.cursor_filter)
+    def __init__(self, name, input_from, input_to):
+        self.input_from = input_from
+        self.input_to = input_to
+        self.input_step = Input(True, pfloat, 1)
 
-    def cursor_filter(self, key):
-        el = self.sections[key]
-        return el.is_enabled() and el.visible()
+        section_from = Section("From", input_from)
+        section_to = Section("To", input_to)
+
+        inputs_section = DoubleSection(section_from, section_to)
+        step_section = Section(name, self.input_step)
+
+        self.sections = {0: step_section, 1: inputs_section}
+
+        self.cursor = VListCursor(self.sections)
+        self.init_form_object(1)
 
     def set_value(self, value):
         pass
@@ -25,12 +34,11 @@ class DoubleSection(FormObject):
         self.sections[0].unfocus()
         self.sections[1].unfocus()
 
+    def visible(self):
+        return self.input_from.visible() and self.input_to.visible() and self.input_step.visible()
+
     def focus(self):
         super().focus()
-        self.cursor.current().focus()
-        if not self.cursor.current().is_enabled():
-            self.cursor.move(Keys.RIGHT)
-
 
     def enable(self):
         super().enable()
@@ -64,24 +72,19 @@ class DoubleSection(FormObject):
         pass
 
     def get_value(self):
-        return [s.get_value() for k, s in self.sections.items()]
+        return {'step': self.input_step.get_value(), 'from': self.input_from.get_value(), 'to': self.input_to.get_value()}
 
     def input(self, key):
-        r = self.cursor.input(key)
-        return r
+        return self.cursor.input(key)
 
     def render(self, renderer):
-        separator = ""
-        width = renderer.width - len(separator)
-
-        half_width =  int(width/2)
-        half_width2 = int(width/2)
-        sizes = [half_width, half_width2]
-        positions = [0, half_width + len(separator)]
 
         def renderer_provider(index, pos_y, cursor, item):
-            return sizes[index], Renderer(1, sizes[index], 0, positions[index], renderer)
+            if pos_y is None:
+                pos_y = 0
+
+            return pos_y, Renderer(1, 0, pos_y, 0, renderer)
 
         self.cursor.render(renderer_provider)
 
-        return 1
+        return 2

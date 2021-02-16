@@ -16,6 +16,9 @@ class Crude(Estimator):
         self.x = datafile.data
         self.name = 'crude'
 
+    def run(self):
+        self.output = self.estimate()
+
     def estimate(self):
         true_mean = np.mean(self.x)
         true_std_deviation = np.std(self.x)

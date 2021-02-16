@@ -13,7 +13,7 @@ class Histogram2(Estimator):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.bins = parameters['bins']
+        self.bins = parameters['bins'] if 'bins' in parameters else 10
         self.name = "HIST({})".format(self.bins)
 
     def estimate(self):

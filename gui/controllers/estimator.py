@@ -9,7 +9,7 @@ from gui.form.double_section import DoubleSection
 from gui.form.section_break import SectionBreak
 
 import estimators.all as estimators
-from gui.objects.executable import EstimatorExecutor
+from executors.executable import ExperimentExecutor
 from gui.controllers.execution import ExecutionController
 
 from datatypes import nfloat, nint, pfloat

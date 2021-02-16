@@ -7,16 +7,31 @@ class AdaptiveHistogram(Estimator):
         return "Adaptive Histogram"
 
     def get_parameters():
-        return ['bins', 'bin_population']
+        return ['bin_population']
 
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
+        default = 'auto'
 
         self.x = datafile.data
-        self.bins = parameters['bins']
-        self.bin_population = parameters['bin_population']
-
+        self.choose_method(parameters)
         self.name = "AH({}, {})".format(int(self.bins), int(self.bin_population))
+
+    def choose_method(self, parameters):
+        self.method = 'manual' if 'bin_population' in parameters else 'auto'
+        self.calculate_population(parameters)
+
+
+    def calculate_population(self, parameters):
+        if self.method == 'auto':
+            self.bin_population = 9
+        else:
+            self.bin_population = parameters['bin_population']
+
+        self.calculate_bins()
+
+    def calculate_bins(self):
+        self.bins = int(len(self.x) / self.bin_population)
 
     def estimate(self):
         self.x.sort()

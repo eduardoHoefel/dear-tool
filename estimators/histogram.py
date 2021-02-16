@@ -13,8 +13,8 @@ class Histogram(Estimator):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.bins_method = parameters['bins_method']
-        self.bins = parameters['bins'] if self.bins_method == 'manual' else self.bins_method
+        self.bins_method = parameters['bins_method'] if 'bins_method' in parameters else 'default'
+        self.bins = 10 if self.bins_method == 'default' else parameters['bins'] if self.bins_method == 'manual' else self.bins_method
         self.name = "HIST({})".format(self.bins)
 
     def estimate(self):

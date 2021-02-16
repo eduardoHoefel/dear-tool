@@ -30,7 +30,7 @@ class Document():
 
 
 class DensityEstimationResultDocument(Document):
-    def __init__(self, estimator, result):
+    def __init__(self, estimator):
         super().__init__()
 
         datafile = estimator.datafile
@@ -42,9 +42,9 @@ class DensityEstimationResultDocument(Document):
             self.append("Known density: ", datafile.density)
 
         self.append("\n")
-        self.append("Density Estimation: ", result)
+        self.append("Density Estimation: ", estimator.output)
         if datafile.density is not None:
-            review = EstimationAnalysis(result, datafile.density)
+            review = EstimationAnalysis(estimator.output, datafile.density)
             self.append("Error (raw): ", review.raw)
             self.append("Error (relative): ", review.relative)
             self.append("Score: ", review.score)

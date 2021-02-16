@@ -1,147 +1,72 @@
 from calculate import Calculate
 import scipy as sc
 
-from estimators.histogram import Histogram
-from estimators.adaptive_histogram import AdaptiveHistogram
-from estimators.kernel import Kernel
-from estimators.nearest_neighbors import NN
-from estimators.real import Real
-from estimators.crude import Crude
 from estimators.known_formula import KnownFormula
-
-from data_provider import DataProvider
-
-default_estimator_classes = [Real, Crude, Kernel, Histogram, AdaptiveHistogram]
+import estimators.all as EstimatorsMother
 
 class Experiment():
 
-    def get_e_data(m, s, data):
-        e_data = {}
+    def __init__(self, EstimatorClass, datafile, parameters):
 
-        e_data['m'] = m
-        e_data['s'] = s
-        e_data['x'] = data
-        e_data['f'] = sc.stats.norm.pdf
+        self.parameters = parameters
+        self.datafile = datafile
+        self.results = {}
+        self.EstimatorClass = EstimatorClass
+        self.estimators = None
 
-        return e_data
+    def get_range_parameter(self, parameters):
+        found_k = None
+        found_v = None
 
-    def get_estimators(e_data, estimator_classes, custom_attributes={}):
+        if parameters is None:
+            return None, None, None
 
-        from collections.abc import Iterable
+        for k,v in parameters.items():
+            if type(v) is dict:
+                if found_k is not None:
+                    return found_k, found_v, True
+                found_k = k
+                found_v = v
 
-        estimators = []
+        return found_k, found_v, False
 
-        if not isinstance(estimator_classes, Iterable):
-            estimator_classes = [estimator_classes]
+    def prepare(self):
+        self.estimators = {}
+        if self.EstimatorClass == 'all':
+            for estimator in EstimatorsMother.get_all():
+                #if we are running all estimators, its best to not have fancy parameters
+                self.estimators.update(self.get_estimator_all_executions(estimator, {}))
+        else:
+            self.estimators = self.get_estimator_all_executions(self.EstimatorClass, self.parameters)
 
-        for e in estimator_classes:
-            if len(custom_attributes) == 0:
-                estimators.append(e(e_data))
-                continue
+    def get_estimator_keys(self):
+        return list(self.estimators.keys())
 
-            for k in custom_attributes.keys():
-                e_data[k] = None
-                v1 = custom_attributes[k]
+    def run_estimator(self, key):
+        self.estimators[key].run()
 
-                if not isinstance(v1, Iterable):
-                    v1 = [v1]
+    def get_estimator_all_executions(self, EstimatorClass, parameters):
+        parameters = {k: v for k, v in parameters.items() if k in EstimatorClass.get_parameters()}
+        range_key, range_value, has_more = self.get_range_parameter(parameters)
 
-                for v2 in v1:
-                    e_data[k] = v2
-                    estimators.append(e(e_data))
+        estimators = {}
 
-                e_data.pop(k)
+        if range_key is not None:
+            from_value = range_value['from']
+            to_value = range_value['to']
+            step = range_value['step']
+
+            p2 = {k: v for k, v in parameters.items() if v != range_value}
+            for v in range(from_value, to_value, step):
+                p2[range_key] = v
+                if has_more is True:
+                    estimators.update(self.get_estimator_all_executions(EstimatorClass, p2))
+                else:
+                    estimator = EstimatorClass(self.datafile, p2)
+                    estimators[estimator.name] = estimator
+
+        else:
+            estimator = EstimatorClass(self.datafile, parameters)
+            estimators[estimator.name] = estimator
 
         return estimators
-
-
-    def from_real_data(m, s, data, estimator_classes=default_estimator_classes, custom_attributes={}):
-        e_data = Experiment.get_e_data(m, s, data)
-
-        estimators = Experiment.get_estimators(e_data, estimator_classes, custom_attributes)
-
-        return Experiment(e_data, estimators)
-
-    def from_syntetic_data(m, s, samples, estimator_classes=default_estimator_classes, custom_attributes={}):
-        data = DataProvider.syntetic(m, s, samples)
-
-        return Experiment.from_real_data(m, s, data, estimator_classes, custom_attributes)
-
-
-    def __init__(self, e_data, estimators):
-
-        self.e_data = e_data
-        self.results = {}
-        self.estimators = estimators
-
-        self.run()
-
-    def run(self):
-        self.expected_result = KnownFormula(self.e_data).estimate()
-
-        for e in self.estimators:
-            r = e.estimate()
-            self.results[e.name] = r
-
-    def get_results(self):
-        return self.results
-
-    def get_errors(self):
-        base_r = self.expected_result
-
-        errors = {}
-        for k in self.results.keys():
-            r = self.results[k]
-            errors[k] = Calculate.error(base_r, r)
-
-        return errors
-
-    def get_scores(self, method='auto'):
-        base_r = self.expected_result
-
-        scores = {}
-        for k in self.results.keys():
-            r = self.results[k]
-            s = Calculate.score(base_r, r, method)
-            if s:
-                scores[k] = s
-
-        return scores
-
-    def get_best_estimators(self, top=10):
-        errors = self.get_errors()
-        best_keys = []
-
-        for i in range(top):
-            best_k = None
-            for k in errors.keys():
-                if k in best_keys:
-                    continue
-
-                if best_k is None or errors[k] < errors[best_k]:
-                    best_k = k
-            if best_k is not None:
-                best_keys.append(best_k)
-
-        return best_keys
-
-
-
-
-
-
-    def __str__(self):
-        max_name_len = 2
-        build_str = ''
-
-        build_str += ("Expected:\t\t{}{}\tError (%)\n".format('\t' * (max_name_len-int(len("Expected")/8)), self.expected_result))
-
-        best_keys = self.get_best_estimators()
-        for i in range(len(best_keys)):
-            name = best_keys[i]
-            r = self.results[name]
-            build_str += "#{}: H(X) ({}):\t{}{}\t{}\n".format(i+1, name, '\t' * (max_name_len-int(len(name)/8)), r, Calculate.error(self.expected_result, r))
-
-        return build_str
-
-    

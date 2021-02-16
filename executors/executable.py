@@ -72,3 +72,23 @@ class EstimatorExecutor(Executor):
 
     def get_output(self):
         return DensityEstimationResultDocument(self.estimator, self.output)
+
+class ExperimentExecutor(Executor):
+
+    def __init__(self, experiment):
+        super().__init__()
+        self.experiment = experiment
+        experiment.prepare()
+        self.estimator_keys = experiment.get_estimator_keys()
+
+    def step_exec(self, step):
+        if step < 0 or step >= len(self.estimator_keys):
+            #something wrong. lets stop
+            return True
+
+        self.experiment.run_estimator(self.estimator_keys[step])
+        self.update_progress((step+1)/len(self.estimator_keys))
+        return step+1 == len(self.estimator_keys)
+
+    def get_output(self):
+        return DensityEstimationResultDocument(self.experiment.estimators[self.estimator_keys[0]])

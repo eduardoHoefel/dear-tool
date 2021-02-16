@@ -14,8 +14,8 @@ class Kernel(Estimator):
         super().__init__(datafile, parameters)
 
         self.x = datafile.data
-        self.kernel = parameters['kernel']
-        self.bandwidth = parameters['bandwidth']
+        self.kernel = parameters['kernel'] if 'kernel' in parameters else 'gaussian'
+        self.bandwidth = parameters['bandwidth'] if 'bandwidth' in parameters else 0.4
         self.name = "KDE({}, {})".format(self.kernel, self.bandwidth)
 
     def estimate(self):
