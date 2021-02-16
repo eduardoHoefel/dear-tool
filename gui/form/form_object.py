@@ -12,6 +12,9 @@ class FormObject():
         self.enable()
         self.show()
 
+    def is_focused(self):
+        return self.focused
+
     def set_value(self, value):
         pass
 
@@ -26,6 +29,9 @@ class FormObject():
 
     def disable(self):
         self.enabled = False
+
+    def is_enabled(self):
+        return self.enabled
 
     def show(self):
         self.display = "visible"
@@ -47,6 +53,9 @@ class FormObject():
 
     def on_change(self, on_change_func):
         self.on_change_do = on_change_func
+
+    def get_value(self):
+        return None
 
     def input(self, key):
         old_value = self.get_value()

@@ -1,6 +1,10 @@
 from gui.controllers.window_controller import WindowController
 from gui.form.controller import FormController
+
 from gui.form.input import Input
+from gui.form.section import Section
+
+from gui.form.section_break import SectionBreak
 from gui.tools import Menu
 
 from estimators.known_formula import KnownFormula
@@ -21,12 +25,17 @@ class CreateSynteticDatafileController(WindowController):
         def window_provider(title):
             return self.window.internal_renderer
 
-        self.form = FormController(window_provider, self.remove, self.submit)
-        self.form.add_input('samples', Input('Samples', True, int, 1500))
-        self.form.add_input('m', Input('Mean', True, myfloat, -2))
-        self.form.add_input('s', Input('Standard deviation', True, nfloat, 2))
+        self.form = FormController(window_provider)
+
+        self.form.add_input('samples', Section("Samples", Input(True, int, 1500)))
+        self.form.add_input('m', Section("Mean", Input(True, myfloat, -2)))
+        self.form.add_input('s', Section("Standard deviation", Input(True, nfloat, 2)))
 
         self.submitted = False
+
+        #self.form.add_input('break1', SectionBreak())
+        self.form.add_button('cancel', "Cancel", self.remove)
+        self.form.add_button('submit', "Submit", self.submit)
         self.form.start()
 
     def render(self):
@@ -37,7 +46,8 @@ class CreateSynteticDatafileController(WindowController):
         self.form.input(key)
         return True
 
-    def submit(self, data):
+    def submit(self):
+        data = self.form.get_data()
         if self.submitted is True:
             return
 

@@ -4,6 +4,8 @@ from gui.form.controller import FormController
 
 from gui.form.input import Input
 from gui.form.select import Select
+from gui.form.section import Section
+from gui.form.section_break import SectionBreak
 
 import estimators.all as estimators
 from gui.objects.executable import EstimatorExecutor
@@ -22,7 +24,7 @@ class EstimatorController(WindowController):
         def window_provider(title):
             return self.window.internal_renderer
 
-        self.form = FormController(window_provider, self.remove, self.submit)
+        self.form = FormController(window_provider)
 
         def datafile_options_provider():
             datafiles = self.s.get('datafiles')
@@ -33,7 +35,7 @@ class EstimatorController(WindowController):
 
             return datafile_options
 
-        datafile_select = Select('Datafile', True, datafile_options_provider)
+        datafile_select = Section("Datafile", Select(True, datafile_options_provider))
 
         self.form.add_input('datafile', datafile_select)
 
@@ -46,18 +48,15 @@ class EstimatorController(WindowController):
             return options
 
 
-        estimator_select = Select('Estimator', True, get_estimator_options)
+        estimator_select = Section("Estimator", Select(True, get_estimator_options))
         self.form.add_input('estimator', estimator_select)
+        self.form.add_input('break1', SectionBreak())
 
-        parameters = {}
-        parameters['bins_method'] = Select('Bins method', True, {'manual': "Manual", 'auto': "Auto", 'fd': "Freedman Diacosis", 'doane': "Doane", 'scott': "Scott", 'stone': "Stone", 'rice': "Rice", 'sturges': "Sturges", 'sqrt': "Square root"})
-        parameters['bins'] = Input('Bins', False, nint, 9)
-        parameters['bin_population'] = Input('Bin population', False, nfloat, 9)
-        parameters['kernel'] = Select('Kernel', True, {'gaussian': "Gaussian"})
-        parameters['bandwidth'] = Input('Bandwidth', True, pfloat, 0.4)
+        parameters = estimators.get_all_inputs(datafile_select)
+        names = estimators.get_all_input_names()
 
         for p in parameters.keys():
-            self.form.add_input(p, parameters[p])
+            self.form.add_input(p, Section(names[p], parameters[p]))
 
         def on_estimator_change(old_value, new_value, is_valid=True):
             for inp in parameters.values():
@@ -69,33 +68,11 @@ class EstimatorController(WindowController):
                     parameters[p].reset()
                     parameters[p].changed()
 
-        def on_bins_method_change(old_value, new_value, is_valid):
-            if new_value == "manual":
-                parameters['bins'].reset()
-            else:
-                parameters['bins'].disable()
-                parameters['bins'].set_value("Disabled")
-
-        def on_bins_change(old_value, new_value, is_valid):
-            if is_valid:
-                datafile = datafile_select.get_value()
-                if datafile is not None:
-                    samples = datafile.samples
-                    parameters['bin_population'].set_value(samples/new_value)
-
-        def on_population_change(old_value, new_value, is_valid):
-            if is_valid:
-                datafile = datafile_select.get_value()
-                if datafile is not None:
-                    samples = datafile.samples
-                    parameters['bins'].set_value(int(samples/new_value))
-
-
         estimator_select.on_change(on_estimator_change)
-        parameters['bins_method'].on_change(on_bins_method_change)
-        parameters['bins'].on_change(on_bins_change)
-        parameters['bin_population'].on_change(on_population_change)
         on_estimator_change(None, None)
+
+        self.form.add_button('cancel', "Cancel", self.remove)
+        self.form.add_button('submit', "Submit", self.submit)
         self.form.start()
 
 
@@ -107,13 +84,8 @@ class EstimatorController(WindowController):
         super().render()
         self.form.render()
 
-    def needs_mean(self):
-        return self.form.inputs['estimator'] in [KnownFormula, Real]
-
-    def needs_std(self):
-        return self.form.inputs['estimator'] in [KnownFormula, Real]
-
-    def submit(self, data):
+    def submit(self):
+        data = self.form.get_data()
         datafile = data['datafile']
         Estimator = data['estimator']
         parameters = data

@@ -18,7 +18,7 @@ class QuickActionsMenu(WindowController):
 
         if key == 'c':
             def window_provider(title):
-                return self.main_window.popup(10, 45, 'center', title)
+                return self.main_window.popup(11, 45, 'center', title)
 
             popup = CreateSynteticDatafileController(window_provider)
             WindowController.add(popup)

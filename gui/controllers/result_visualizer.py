@@ -27,7 +27,7 @@ class ResultVisualizer(WindowController):
 
     def render(self):
         super().render()
-        renderer = Renderer(0, -4, 0, 4, self.window.internal_renderer)
+        renderer = Renderer(0, -5, 0, 4, self.window.internal_renderer)
         self.document.render(renderer)
         self.back.render()
         pass

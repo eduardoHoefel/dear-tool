@@ -26,5 +26,7 @@ class Button(WindowController, FormObject):
         options = {'color': color}
         r1.addstr(0, 1, self.name, options)
 
+        return 3
+
 
 
