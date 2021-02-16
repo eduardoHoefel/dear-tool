@@ -50,7 +50,7 @@ class Section(FormObject):
         return self.inp.is_valid()
 
     def on_change(self, on_change_func):
-        return self.inp.on_change(on_change_func)
+        pass
 
     def get_value(self):
         return self.inp.get_value()

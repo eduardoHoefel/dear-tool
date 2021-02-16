@@ -1,6 +1,7 @@
 from gui.tools import Menu
 from gui.controllers.window_controller import WindowController
 from gui.controllers.estimator import EstimatorController
+from gui.controllers.experiment import ExperimentController
 import gui.colors as Colors
 
 class MainMenu(WindowController):
@@ -66,7 +67,11 @@ class MainMenu(WindowController):
         WindowController.add(popup)
 
     def experiment(self):
-        pass
+        def get_window(title):
+            return self.window.internal_renderer.popup(-1, -2, 'bottom', title)
+
+        popup = ExperimentController(get_window)
+        WindowController.add(popup)
 
     def experiment_statistics(self):
         pass

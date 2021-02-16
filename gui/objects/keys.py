@@ -1,0 +1,8 @@
+
+UP = 'KEY_UP'
+DOWN = 'KEY_DOWN'
+LEFT = 'KEY_LEFT'
+RIGHT = 'KEY_RIGHT'
+ENTER = ['KEY_ENTER', '\n']
+BACKSPACEs = '\b'
+

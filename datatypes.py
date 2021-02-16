@@ -8,9 +8,12 @@ def natural(value):
 def positive(value):
     return abs(myfloat(value))
 
+def myint(value):
+    return int(float(value))
+
 def myfloat(value):
-    if float(value) == int(float(value)):
-        return int(value)
+    if float(value) == myint(value):
+        return myint(value)
 
     return float(value)
 
@@ -25,8 +28,8 @@ def nfloat(value):
 
 '''positive int '''
 def pint(value):
-    return positive(int(value))
+    return positive(myint(value))
 
 '''natural int'''
 def nint(value):
-    return natural(int(value))
+    return natural(myint(value))

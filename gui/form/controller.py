@@ -1,27 +1,32 @@
 from gui.form.button import Button
 from gui.controllers.window_controller import WindowController
 from gui.window import Renderer
-from gui.objects.cursor_manager import CursorManager
+from gui.objects.cursors.vcycle import VCycleCursor
 import gui.colors as Colors
+import gui.objects.keys as Keys
 
-class FormController(WindowController, CursorManager):
+class FormController(WindowController):
 
     def __init__(self, window_provider):
         super().__init__(None, window_provider)
         self.elements = {}
+        self.action_buttons = {}
         self.cursor = None
+        self.submit = None
 
-    def add_button(self, key, title, on_press):
+    def set_action_button(self, action, button):
+        self.action_buttons[action] = button
+
+    def get_button(self, key, title, on_press):
         def window_provider(faketitle):
             return self.window.popup(3, 4+len(title), 'bottom' if key == 'cancel' else 'bottom-right', None)
-        self.elements[key] = Button(title, window_provider, on_press, Colors.SUCCESS if key == 'submit' else Colors.DEFAULT)
+        return Button(title, window_provider, on_press, Colors.SUCCESS if key == 'submit' else Colors.DEFAULT)
 
     def start(self):
+        self.cursor = VCycleCursor(self.elements)
+        self.cursor.set_filter(self.cursor_filter)
+        self.cursor.set_draw_filter(self.draw_filter)
         self.input(None)
-        cursor_options = self.interactible_cursor_options()
-        self.cursor = list(cursor_options.keys())[0]
-        cursor_options[self.cursor].focus()
-
 
     def get_data(self):
         data = {}
@@ -30,72 +35,48 @@ class FormController(WindowController, CursorManager):
 
         return data
 
+    def cursor_filter(self, key):
+        el = self.elements[key]
+        return el.is_enabled() and el.visible()
+
     def can_submit(self):
-        editable = self.interactible_cursor_options()
-        for p in self.elements.keys():
-            if p in editable and not self.elements[p].is_valid():
+        editable = {k: v for k, v in self.elements.items() if self.cursor_filter(k)}
+        for k, v in editable.items():
+            if not v.is_valid():
                 return False
+
         return True
 
-    def add_input(self, key, inp):
+    def add_element(self, key, inp):
         self.elements[key] = inp
 
-    def interactible_cursor_options(self):
-        cursor_options = self.renderable_cursor_options()
-        interactible_keys = [k for k in cursor_options.keys() if cursor_options[k].is_enabled() and cursor_options[k].visible()]
-        options = {}
-        for key in interactible_keys:
-            options[key] = cursor_options[key]
-
-        return options
-
-    def cursor_values(self):
-        cursor_values = list(self.elements.keys())
-        cursor_values = [c for c in cursor_values if self.elements[c].visible()]
-
-        return cursor_values
-
-    def renderable_cursor_options(self):
-        return self.elements
-
-        #options = {}
-        #keys = self.cursor_values()
-        #for key in keys:
-        #    options[key] = self.elements[key]
-
-        #return options
+    def draw_filter(self, key):
+        el = self.elements[key]
+        return el.visible()
 
     def input(self, key):
-        r = self.cursor_input(key)
+        r = self.cursor.input(key)
 
-        if 'submit' in self.elements:
-            submit = self.elements['submit']
+        if 'submit' in self.action_buttons.keys():
+            submit = self.action_buttons['submit']
             if self.can_submit():
                 submit.enable()
-                if r is False and key in ['KEY_ENTER', '\n']:
-                    r = submit.input(key)
+                if r is False and key in Keys.ENTER:
+                    return submit.input(key)
             else:
                 submit.disable()
+
+        if 'cancel' in self.action_buttons.keys():
+            pass
 
         return r
 
     def render(self):
-        renderer = self.window
+        def renderer_provider(index, pos_y, cursor, item):
+            if pos_y is None:
+                pos_y = 0
 
-        tbr = self.renderable_cursor_options()
+            return pos_y, Renderer(1, -1, pos_y, 0, self.window)
 
-        tbr_original = self.cursor_values()
-        tbr_order = self.cursor_values()
-
-        drawn_at_pos = {}
-
-        pos_x = 0
-
-        for obj in tbr_order:
-            drawn_at_pos[obj] = pos_x
-            renderer = Renderer(1, -1, pos_x, 0, self.window)
-            pos_x += tbr[obj].render(renderer)
-
-        renderer = Renderer(1, -1, drawn_at_pos[self.cursor], 0, self.window)
-        tbr[self.cursor].render(renderer)
+        self.cursor.render(renderer_provider)
 

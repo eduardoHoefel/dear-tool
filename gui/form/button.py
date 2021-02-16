@@ -1,6 +1,7 @@
 from gui.controllers.window_controller import WindowController
 from gui.form.form_object import FormObject
 import gui.colors as Colors
+import gui.objects.keys as Keys
 
 class Button(WindowController, FormObject):
 
@@ -13,7 +14,7 @@ class Button(WindowController, FormObject):
         self.default_color = default_color
 
     def input(self, key):
-        if key in ['KEY_ENTER', '\n', '\r']:
+        if key in Keys.ENTER:
             self.action()
             return True
         return False

@@ -16,10 +16,10 @@ from datatypes import nfloat, nint, pfloat
 
 import log
 
-class EstimatorController(WindowController):
+class ExperimentController(WindowController):
 
     def __init__(self, window_provider):
-        title = "Run estimator"
+        title = "Run experiment"
         super().__init__(title, window_provider)
 
         def window_provider(title):
@@ -53,21 +53,36 @@ class EstimatorController(WindowController):
         self.form.add_element('estimator', estimator_select)
         self.form.add_element('break1', SectionBreak())
 
-        parameters = estimators.get_all_inputs(datafile_select)
+        min_parameters = estimators.get_all_inputs(datafile_select)
+        max_parameters = estimators.get_all_inputs(datafile_select)
         names = estimators.get_all_input_names()
 
-        for p in parameters.keys():
-            self.form.add_element(p, Section(names[p], parameters[p]))
+        simple_parameters = ['bins_method', 'kernel']
+        range_parameters = ['bins', 'bin_population', 'bandwidth']
+        for p in simple_parameters:
+            self.form.add_element(p, Section(names[p], min_parameters[p]))
+
+        for p in range_parameters:
+            #range_step = Input(True, pfloat, 1)
+            #self.form.add_input(p + "_step", Section(names[p] + " step", range_step))
+            section1 = Section("From", min_parameters[p])
+            section2 = Section("To", max_parameters[p])
+            self.form.add_element(p, DoubleSection(section1, section2))
 
         def on_estimator_change(old_value, new_value, is_valid=True):
-            for inp in parameters.values():
+            for inp in min_parameters.values():
+                    inp.disappear()
+            for inp in max_parameters.values():
                     inp.disappear()
 
             if new_value is not None:
                 for p in new_value.get_parameters():
-                    parameters[p].show()
-                    parameters[p].reset()
-                    parameters[p].changed()
+                    min_parameters[p].show()
+                    min_parameters[p].reset()
+                    min_parameters[p].changed()
+                    max_parameters[p].show()
+                    max_parameters[p].reset()
+                    max_parameters[p].changed()
 
         estimator_select.inp.on_change(on_estimator_change)
         on_estimator_change(None, None)
@@ -78,7 +93,6 @@ class EstimatorController(WindowController):
         self.form.set_action_button('cancel', cancel)
         self.form.set_action_button('submit', submit)
         self.form.add_element('buttons', DoubleSection(submit, cancel))
-
         self.form.start()
 
 

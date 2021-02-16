@@ -1,18 +1,17 @@
 from gui.form.button import Button
 from gui.controllers.window_controller import WindowController
 from gui.controllers.task_controller import TaskController
-from gui.objects.cursor_manager import CursorManager
+from gui.objects.cursors.cycle import CycleCursor
 
 from gui.controllers.result_visualizer import ResultVisualizer
 
 from gui.window import Renderer
 
-class ExecutionController(WindowController, CursorManager):
+class ExecutionController(WindowController):
 
     def __init__(self, window_provider, executable):
         title = None
         super().__init__(title, window_provider)
-
         self.executable = executable
 
         def back_window_provider(title):
@@ -21,11 +20,11 @@ class ExecutionController(WindowController, CursorManager):
         def visualize_window_provider(title):
             return self.window.internal_renderer.popup(3, 4+len("Visualize"), 'bottom-right', title)
 
-        self.back = Button("Back", back_window_provider, self.on_back)
+        back = Button("Back", back_window_provider, self.on_back)
 
-        self.visualize = Button("Visualize", visualize_window_provider, self.on_visualize)
+        visualize = Button("Visualize", visualize_window_provider, self.on_visualize)
 
-        self.cursor = 'submit'
+        self.cursor = CycleCursor({'visualize': visualize, 'back': back})
 
         executable.start()
         TaskController.set(self.run)
@@ -36,11 +35,8 @@ class ExecutionController(WindowController, CursorManager):
         if self.executable.finished is True:
             TaskController.remove()
 
-    def interactible_cursor_options(self):
-        return {'cancel': self.back, 'submit': self.visualize}
-
     def input(self, key):
-        return self.cursor_input(key)
+        return self.cursor.input(key)
 
     def on_back(self):
         self.remove()
@@ -68,8 +64,10 @@ class ExecutionController(WindowController, CursorManager):
         self.executable.render(renderer)
 
         if self.executable.finished is True:
-            self.back.render()
-            self.visualize.render()
+            def renderer_provider(index, pos_y, cursor, item):
+                return 0, None
+
+            self.cursor.render(renderer_provider)
 
         pass
 

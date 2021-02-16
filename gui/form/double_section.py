@@ -2,28 +2,34 @@ from gui.form.form_object import FormObject
 from gui.window import Line, LineObject
 import gui.colors as Colors
 from gui.window import Renderer
+from gui.objects.cursors.hcycle import HCycleCursor
+import gui.objects.keys as Keys
 
-class DoubleSection(FormObject, CursorManager):
+class DoubleSection(FormObject):
 
     def __init__(self, section1, section2):
-        self.sections = [section1, section2]
+        self.sections = {0: section1, 1: section2}
+        self.cursor = HCycleCursor(self.sections)
         self.init_form_object(section1.default)
-        self.cursor = 0
+        self.cursor.set_filter(self.cursor_filter)
+
+    def cursor_filter(self, key):
+        el = self.sections[key]
+        return el.is_enabled() and el.visible()
 
     def set_value(self, value):
-        return self.sections[self.cursor].set_value(value)
-
-    def is_focused(self):
-        return self.sections[self.cursor].is_focused()
-
-    def focus(self):
-        super().focus()
-        return self.sections[self.cursor].focus()
+        pass
 
     def unfocus(self):
         super().unfocus()
         self.sections[0].unfocus()
         self.sections[1].unfocus()
+
+    def focus(self):
+        super().focus()
+        if not self.cursor.current().is_enabled():
+            self.cursor.move(Keys.RIGHT)
+
 
     def enable(self):
         super().enable()
@@ -51,64 +57,30 @@ class DoubleSection(FormObject, CursorManager):
         self.sections[1].disappear()
 
     def is_valid(self):
-        return self.sections[0].is_valid() and self.sections[1].is_valid
+        return self.sections[0].is_valid() and self.sections[1].is_valid()
 
     def on_change(self, on_change_func):
-        self.sections[0].on_change(on_change_func)
-        self.sections[1].on_change(on_change_func)
+        pass
 
     def get_value(self):
-        return self.sections[self.cursor].get_value()
-
-    def interactible_cursor_options(self):
-        options = {}
-        for s in range(self.sections):
-            options[s] = self.sections[s]
-
-        return options
-
-    def cursor_input(self, key):
-        if key is None:
-            return False
-
-        cursor_options = self.interactible_cursor_options()
-        current = None if self.cursor is None else cursor_options[self.cursor]
-
-        r = current.input(key)
-        if r is True:
-            return True
-
-        if key == 'KEY_UP':
-            return False
-        if key == 'KEY_DOWN':
-            return False
-        if key == 'KEY_LEFT':
-            if self.cursor == 0:
-                return False
-            self.move_cursor(-1)
-            return True
-        if key == 'KEY_RIGHT':
-            if self.cursor == 1:
-                return False
-            self.move_cursor(1)
-            return True
-
-        return False
+        return [s.get_value() for k, s in self.sections.items()]
 
     def input(self, key):
-        r = self.cursor_input(key)
-
+        r = self.cursor.input(key)
         return r
 
     def render(self, renderer):
         separator = "  "
+        width = renderer.width - len(separator)
 
-        half_width =  int(renderer_length/2-1.5)
-        half_width2 = int(renderer_length/2-1)
+        half_width =  int(width/2-1.5)
+        half_width2 = int(width/2-1)
+        sizes = [half_width, half_width2]
+        positions = [0, half_width + len(separator)]
 
-        renderers = [Renderer(1, half_width, 0, 0, self.renderer), Renderer(1, half_width2, 0, half_width, self.renderer)]
+        def renderer_provider(index, pos_y, cursor, item):
+            return sizes[index], Renderer(1, sizes[index], positions[index], 0, renderer)
 
-        self.sections[1-self.cursor].render(renderers[1-self.cursor])
-        self.sections[self.cursor].render(renderers[self.cursor])
+        self.cursor.render(renderer_provider)
 
         return 1
