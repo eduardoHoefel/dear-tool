@@ -13,8 +13,7 @@ class DoubleSection(FormObject):
         self.init_form_object(section1.default)
         self.cursor.set_filter(self.cursor_filter)
 
-    def cursor_filter(self, key):
-        el = self.sections[key]
+    def cursor_filter(self, key, el):
         return el.is_enabled() and el.visible()
 
     def set_value(self, value):

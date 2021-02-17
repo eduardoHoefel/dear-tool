@@ -15,7 +15,7 @@ class Cursor():
             new_pos = cursor_list[i]
             if new_pos == self.pos:
                 return
-            if self.filter is None or self.filter(new_pos) is True:
+            if self.filter is None or self.filter(new_pos, self.cursor_items[new_pos]) is True:
                 self.go_to(new_pos)
                 return True
 
@@ -25,7 +25,7 @@ class Cursor():
             new_pos = cursor_list[i]
             if new_pos == self.pos:
                 return
-            if self.filter is None or self.filter(new_pos) is True:
+            if self.filter is None or self.filter(new_pos, self.cursor_items[new_pos]) is True:
                 self.go_to(new_pos)
                 return True
 
@@ -59,7 +59,7 @@ class Cursor():
             if new_pos in [None, original_pos]:
                 return False
 
-            if self.filter is None or self.filter(new_pos) is True:
+            if self.filter is None or self.filter(new_pos, self.cursor_items[new_pos]) is True:
                 self.go_to(new_pos)
                 return True
 
@@ -74,7 +74,7 @@ class Cursor():
         return self.move(key)
 
     def render(self, renderer_provider):
-        tbr_order = {k: v for k, v in self.cursor_items.items() if self.draw_filter is None or self.draw_filter(k)}
+        tbr_order = {k: v for k, v in self.cursor_items.items() if self.draw_filter is None or self.draw_filter(k, v)}
 
         renderers_used = {}
         index = 0

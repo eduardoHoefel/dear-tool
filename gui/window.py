@@ -19,12 +19,27 @@ class Renderer():
 
     def addstr(self, pos_y, pos_x, text, options=None):
         color = Colors.DEFAULT
+        color_options = 0
+        hide_cursor = False
         if options is not None:
+            if 'hide_cursor' in options:
+                hide_cursor = options['hide_cursor']
             if 'color' in options:
                 color = options['color']
+            if 'bold' in options and options['bold'] is True:
+                color_options += curses.A_BOLD
+            if 'underline' in options and options['underline'] is True:
+                color_options += curses.A_UNDERLINE
 
-        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color))
+        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color) + color_options)
+
+        if hide_cursor is True:
+            curses.curs_set(0)
+
         return pos_x + len(str(text))
+
+    def reset_cursor():
+        curses.curs_set(1)
 
     def clear(self):
         for i in range(self.height):
@@ -43,6 +58,10 @@ class Renderer():
         if pos == 'center':
             pos_y = -int(height/2) if height <= 0 else int((self.height - height)/2)
             pos_x = -int(width/2) if width <= 0 else int((self.width - width)/2)
+
+        if pos == 'top':
+            pos_y = 0
+            pos_x = 1
 
         if pos == 'bottom':
             pos_y = -height - 1 if height <= 0 else self.height - height
@@ -69,8 +88,13 @@ class Window(Renderer):
         self.clear()
         super().render(options)
         if self.title is not None:
+            if options is None:
+                options = {}
+
+            options['bold'] = True
             if type(self.title) == str:
                 self.addstr(1, 2, self.title, options)
+
             if type(self.title) == list:
                 for i in range(len(self.title)):
                     line = self.title[i]

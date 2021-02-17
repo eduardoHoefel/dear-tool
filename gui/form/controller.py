@@ -35,12 +35,11 @@ class FormController(WindowController):
 
         return data
 
-    def cursor_filter(self, key):
-        el = self.elements[key]
+    def cursor_filter(self, key, el):
         return el.is_enabled() and el.visible()
 
     def can_submit(self):
-        editable = {k: v for k, v in self.elements.items() if self.cursor_filter(k)}
+        editable = {k: v for k, v in self.elements.items() if self.cursor_filter(k, v)}
         for k, v in editable.items():
             if not v.is_valid():
                 return False
@@ -50,8 +49,7 @@ class FormController(WindowController):
     def add_element(self, key, inp):
         self.elements[key] = inp
 
-    def draw_filter(self, key):
-        el = self.elements[key]
+    def draw_filter(self, key, el):
         return el.visible()
 
     def input(self, key):

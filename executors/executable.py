@@ -1,16 +1,16 @@
 import time
 from gui.objects.progress_bar import ProgressBar
-from gui.objects.document import DensityEstimationResultDocument
+from gui.objects.documents.density_estimation_result import DensityEstimationResultDocument
 
 class Executor():
 
-    def __init__(self):
+    def __init__(self, total_steps):
         self.started = False
         self.finished = False
         self.steps_taken = 0
         self.last_step_time = None
         self.progress = 0
-        self.output = None
+        self.total_steps = total_steps
 
     def start(self):
         if self.started:
@@ -57,29 +57,30 @@ class Executor():
         pass
 
     def get_output(self):
-        return Document(self.output)
+        pass
 
 class EstimatorExecutor(Executor):
 
     def __init__(self, estimator):
-        super().__init__()
+        super().__init__(1)
         self.estimator = estimator
 
     def step_exec(self, step):
-        self.output = self.estimator.estimate()
+        self.estimator.run()
         self.update_progress(1)
         return True
 
     def get_output(self):
-        return DensityEstimationResultDocument(self.estimator, self.output)
+        return DensityEstimationResultDocument(self.estimator)
 
 class ExperimentExecutor(Executor):
 
     def __init__(self, experiment):
-        super().__init__()
+        self.estimator_keys = experiment.get_estimator_keys()
+        super().__init__(len(self.estimator_keys))
+
         self.experiment = experiment
         experiment.prepare()
-        self.estimator_keys = experiment.get_estimator_keys()
 
     def step_exec(self, step):
         if step < 0 or step >= len(self.estimator_keys):

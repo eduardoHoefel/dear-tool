@@ -74,7 +74,7 @@ class Section(FormObject):
 
         checked_obj = LineObject(checked_str, 0, {'color': Colors.ERROR})
         required_obj = LineObject(required_str, len(checked_obj), {'color': Colors.IMPORTANT})
-        name_obj = LineObject(name_str, len(required_obj), {'color': name_color})
+        name_obj = LineObject(name_str, len(required_obj), {'color': name_color, 'bold': self.is_focused()})
 
         line.add(checked_obj)
         line.add(required_obj)

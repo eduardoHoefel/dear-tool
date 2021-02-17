@@ -1,52 +1,22 @@
+from gui.objects.renderable import Renderable
 
-class FormObject():
+class FormObject(Renderable):
 
     def init_form_object(self, default=None):
         self.default = default
+        super().__init__()
         self.on_change_do = None
-        self.unfocus()
         self.reset()
 
     def reset(self):
+        super().reset()
         self.set_value(self.default)
-        self.enable()
-        self.show()
 
     def is_focused(self):
         return self.focused
 
     def set_value(self, value):
         pass
-
-    def focus(self):
-        self.focused = True
-
-    def unfocus(self):
-        self.focused = False
-
-    def enable(self):
-        self.enabled = True
-
-    def disable(self):
-        self.enabled = False
-
-    def is_enabled(self):
-        return self.enabled
-
-    def show(self):
-        self.display = "visible"
-
-    def hide(self):
-        self.display = "hidden"
-
-    def disappear(self):
-        self.display = None
-
-    def visible(self):
-        return self.display == "visible"
-
-    def hidden(self):
-        return self.display == "hidden"
 
     def is_valid(self):
         return True

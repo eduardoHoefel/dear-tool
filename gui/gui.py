@@ -5,10 +5,13 @@ RUNNING = 1
 
 from gui.controllers.main import MainMenu
 from gui.controllers.quick_actions import QuickActionsMenu
-from gui.window import Window
+from gui.window import Window, Renderer
 from storage import Storage
 
 import time
+
+TASK_FPS = 1
+INPUT_FPS = 60
 
 class Gui():
 
@@ -16,8 +19,6 @@ class Gui():
         self.height, self.width = stdscr.getmaxyx()
         self.begin_y = 0
         self.begin_x = 0
-        self.fps = 60
-        self.update_frequency = 1/self.fps
         self.last_render = None
 
         self.height -= 1
@@ -45,10 +46,17 @@ class Gui():
         self.windows = [self.quick_actions, main]
 
         self.running = True
+        self.had_task = False
+        self.update_fps(INPUT_FPS)
 
         while self.running:
             self.render()
             self.tick()
+
+    def update_fps(self, fps):
+        self.fps = fps
+        self.update_frequency = 1/self.fps
+        self.force_next_render = True
 
     def quit(self):
         self.running = False
@@ -56,7 +64,14 @@ class Gui():
     def tick(self):
         current_task = self.s.get('task')
         if current_task is not None:
+            self.had_task = True
+            self.update_fps(TASK_FPS)
             current_task()
+            return
+
+        if self.had_task is True:
+            self.had_task = False
+            self.update_fps(INPUT_FPS)
             return
 
         c = self.win.getkey()
@@ -79,9 +94,11 @@ class Gui():
 
     def render(self):
         cur_time = time.time()
-        if self.last_render is not None and (cur_time - self.last_render) < self.update_frequency:
+        if not self.force_next_render and (self.last_render is not None and (cur_time - self.last_render) < self.update_frequency):
             return
 
+        self.force_next_render = False
+        Renderer.reset_cursor()
         self.win.clear()
         for w in self.windows:
             w.render()
