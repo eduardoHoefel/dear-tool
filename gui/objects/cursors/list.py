@@ -10,7 +10,7 @@ class ListCursor(Cursor):
         for i in range(len(cursor_list)):
             c = cursor_list[i]
             left = None if i == 0 else cursor_list[i-1]
-            right = None if 1+1 == len(cursor_list) else cursor_list[i+1]
+            right = None if i+1 == len(cursor_list) else cursor_list[i+1]
             c_map = {}
             c_map[Keys.UP] = left
             c_map[Keys.LEFT] = left

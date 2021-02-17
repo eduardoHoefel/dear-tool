@@ -24,7 +24,8 @@ class DensityEstimationResultDocument(Document):
         text_parts.append(NewLine())
         text_parts.append(report_line("Density Estimation: ", estimator.output))
         if datafile.density is not None:
-            review = EstimationAnalysis(estimator.output, datafile.density)
+            estimator.analyse(datafile.density)
+            review = estimator.review
             text_parts.append(report_line("Error (raw): ", review.raw))
             text_parts.append(report_line("Error (relative): ", review.relative))
             text_parts.append(report_line("Score: ", review.score))

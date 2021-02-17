@@ -2,6 +2,7 @@
 class Renderable():
 
     def __init__(self):
+        self.required = False
         self.reset()
 
     def reset(self):
@@ -9,11 +10,17 @@ class Renderable():
         self.enable()
         self.show()
 
+    def is_valid(self):
+        return True
+
     def enable(self):
         self.enabled = True
 
     def disable(self):
         self.enabled = False
+
+    def is_focused(self):
+        return self.focused
 
     def is_enabled(self):
         return self.enabled

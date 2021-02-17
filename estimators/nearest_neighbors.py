@@ -17,4 +17,4 @@ class NN(Estimator):
         self.name = "nn"
 
     def estimate(self):
-        pass
+        return 0

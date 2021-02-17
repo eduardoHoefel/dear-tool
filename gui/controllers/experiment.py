@@ -76,13 +76,17 @@ class ExperimentController(WindowController):
             for inp in max_parameters.values():
                     inp.disappear()
 
-            if new_value is not None:
+            if new_value is not None and type(new_value) != str:
                 for p in new_value.get_parameters():
                     min_parameters[p].show()
                     min_parameters[p].reset()
                     min_parameters[p].changed()
                     max_parameters[p].show()
                     max_parameters[p].reset()
+                    cur_value = max_parameters[p].get_value()
+
+                    if type(cur_value) != str and cur_value is not None:
+                        max_parameters[p].set_value(cur_value*100)
                     max_parameters[p].changed()
 
         estimator_select.inp.on_change(on_estimator_change)

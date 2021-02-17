@@ -1,3 +1,4 @@
+import gui.objects.keys as Keys
 
 class Cursor():
 
@@ -29,17 +30,31 @@ class Cursor():
                 self.go_to(new_pos)
                 return True
 
+    def focus(self):
+        self.cursor_items[self.pos].focus()
+
+    def unfocus(self):
+        self.cursor_items[self.pos].unfocus()
+
+
     def go_to(self, pos):
+        if pos == self.pos:
+            return False
+
         if self.pos is not None:
             self.cursor_items[self.pos].unfocus()
         self.pos = pos
         self.cursor_items[self.pos].focus()
 
+        return True
+
     def go_to_index(self, index):
-        self.go_to(list(self.cursor_map.keys())[index])
+        return self.go_to(list(self.cursor_map.keys())[index])
 
     def set_filter(self, f):
         self.filter = f
+        self.go_to_last()
+        self.go_to_first()
 
     def set_draw_filter(self, f):
         self.draw_filter = f
@@ -50,6 +65,21 @@ class Cursor():
     def move(self, key):
         original_pos = self.pos
         new_pos = self.pos
+
+        if key == Keys.ESC:
+            if self.go_to_first():
+                return True
+
+            if 'cancel' in list(self.cursor_map.keys()):
+                cancel = self.cursor_items['cancel']
+                return cancel.input(Keys.ENTER[0])
+
+            if 'back' in list(self.cursor_map.keys()):
+                back = self.cursor_items['back']
+                return back.input(Keys.ENTER[0])
+
+            return False
+
         while True:
             possible_moves = self.cursor_map[new_pos]
             if key not in possible_moves:
@@ -88,3 +118,4 @@ class Cursor():
             index += 1
 
         self.current().render(renderers_used[self.pos])
+        return 0

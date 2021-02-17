@@ -4,18 +4,22 @@ from gui.objects.cursors.vlist import VListCursor
 from gui.window import Renderer
 from gui.form.form_object import FormObject
 from gui.objects.documents.document import ScrollBar
+import gui.objects.keys as Keys
 
 class DocumentViewer(WindowController, FormObject):
 
-    def __init__(self, window_provider, document):
+    def __init__(self, window_provider):
         super().__init__(None, window_provider)
         self.init_form_object()
+
+
+    def set_document(self, document):
         self.document = document
         self.cursor = None
-        self.collision_view_start = 0
         self.view_start = 0
         self.scroll_bar = ScrollBar(self.window.internal_renderer.height, document.get_size())
         self.update_view()
+
 
     def get_view(self, scroll_off=0):
         height = self.window.internal_renderer.height
@@ -35,6 +39,11 @@ class DocumentViewer(WindowController, FormObject):
 
     def input(self, key):
         r = self.cursor.input(key)
+
+        if key == Keys.ESC and r:
+            self.set_document(self.document)
+            return True
+
         self.update_view()
 
         return r

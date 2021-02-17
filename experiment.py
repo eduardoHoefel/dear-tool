@@ -8,11 +8,13 @@ class Experiment():
 
     def __init__(self, EstimatorClass, datafile, parameters):
 
-        self.parameters = parameters
+        self.parameters = {} if EstimatorClass == 'all' else {k: v for k, v in parameters.items() if k in EstimatorClass.get_parameters()}
         self.datafile = datafile
         self.results = {}
         self.EstimatorClass = EstimatorClass
         self.estimators = None
+
+        self.real_value = datafile.density
 
     def get_range_parameter(self, parameters):
         found_k = None
@@ -43,7 +45,11 @@ class Experiment():
         return list(self.estimators.keys())
 
     def run_estimator(self, key):
-        self.estimators[key].run()
+        e = self.estimators[key]
+        e.run()
+        if self.real_value is not None:
+            e.analyse(self.real_value)
+
 
     def get_estimator_all_executions(self, EstimatorClass, parameters):
         parameters = {k: v for k, v in parameters.items() if k in EstimatorClass.get_parameters()}
@@ -54,10 +60,12 @@ class Experiment():
         if range_key is not None:
             from_value = range_value['from']
             to_value = range_value['to']
-            step = range_value['step']
+            step_size = range_value['step']
+            steps = round((to_value - from_value)/step_size)
 
             p2 = {k: v for k, v in parameters.items() if v != range_value}
-            for v in range(from_value, to_value, step):
+            for i in range(steps):
+                v = i*step_size + from_value
                 p2[range_key] = v
                 if has_more is True:
                     estimators.update(self.get_estimator_all_executions(EstimatorClass, p2))

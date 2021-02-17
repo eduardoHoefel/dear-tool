@@ -1,5 +1,6 @@
 from gui.controllers.window_controller import WindowController
 from gui.controllers.create_syntetic_datafile import CreateSynteticDatafileController
+import gui.objects.keys as Keys
 
 class QuickActionsMenu(WindowController):
 
@@ -9,7 +10,7 @@ class QuickActionsMenu(WindowController):
         self.main_window = main_window
 
     def input(self, key):
-        if key == 'q':
+        if key == 'q' or key == Keys.ESC:
             self.remove()
             return True
 

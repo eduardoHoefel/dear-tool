@@ -55,6 +55,7 @@ class FormController(WindowController):
     def input(self, key):
         r = self.cursor.input(key)
 
+
         if 'submit' in self.action_buttons.keys():
             submit = self.action_buttons['submit']
             if self.can_submit():
@@ -65,6 +66,9 @@ class FormController(WindowController):
                 submit.disable()
 
         if 'cancel' in self.action_buttons.keys():
+            cancel = self.action_buttons['cancel']
+            if r is False and key == Keys.ESC:
+                return cancel.input(Keys.ENTER[0])
             pass
 
         return r

@@ -1,6 +1,7 @@
 from gui.form.form_object import FormObject
 from gui.window import Line, LineObject
 import gui.colors as Colors
+import gui.objects.keys as Keys
 
 class Input(FormObject):
 
@@ -27,16 +28,16 @@ class Input(FormObject):
         if key is None:
             return False
 
-        if key in ['KEY_ENTER', '\n', 'KEY_UP', 'KEY_DOWN']:
+        if key in Keys.INPUT_IGNORE:
             return False
 
-        if key == 'KEY_LEFT':
+        if key == Keys.LEFT:
             return self.move_cursor(+1)
 
-        if key == 'KEY_RIGHT':
+        if key == Keys.RIGHT:
             return self.move_cursor(-1)
 
-        if key in ('KEY_BACKSPACE', '\b', '\x7f'):
+        if key in Keys.BACKSPACE:
             if self.cursor == len(self.value):
                 return False
 
@@ -44,7 +45,7 @@ class Input(FormObject):
             del aux[-(1+self.cursor)]
             self.value = "".join(aux)
             return True
-        if key  == 'KEY_DC':
+        if key == Keys.DELETE:
             if self.cursor == 0:
                 return False
 

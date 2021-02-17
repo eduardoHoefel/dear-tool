@@ -3,7 +3,7 @@ import numpy as np
 class EstimationAnalysis():
 
     def __init__(self, estimation, real_value):
-        self.estimation = estimation
+        self.estimation = 0 if estimation is None else estimation
         self.real_value = real_value
         self.review()
 

@@ -2,8 +2,12 @@ from gui.form.button import Button
 from gui.controllers.window_controller import WindowController
 from gui.controllers.task_controller import TaskController
 from gui.objects.cursors.cycle import CycleCursor
+from gui.objects.progress_bar import ProgressBar
+from gui.objects.live_data import LiveData
+from gui.form.section import Section
+from gui.static.formatter import Formatter
 
-from gui.controllers.result_visualizer import ResultVisualizer
+from gui.controllers.result_visualizer import DocumentWindow
 
 from gui.window import Renderer
 
@@ -11,7 +15,7 @@ class ExecutionController(WindowController):
 
     def __init__(self, window_provider, executable):
         title = None
-        super().__init__(title, window_provider)
+        super().__init__(title, window_provider, {'align': 'center'})
         self.executable = executable
 
         def back_window_provider(title):
@@ -20,11 +24,23 @@ class ExecutionController(WindowController):
         def visualize_window_provider(title):
             return self.window.internal_renderer.popup(3, 4+len("Visualize"), 'bottom-right', title)
 
-        back = Button("Back", back_window_provider, self.on_back)
+        self.back = Button("Back", back_window_provider, self.on_back)
 
-        visualize = Button("Visualize", visualize_window_provider, self.on_visualize)
+        self.visualize = Button("Visualize", visualize_window_provider, self.on_visualize)
 
-        self.cursor = CycleCursor({'visualize': visualize, 'back': back})
+        progress_bar = ProgressBar(executable.get_progress)
+
+        live_time_progress = LiveData(executable.get_running_time, Formatter.timedelta_to_string)        
+        live_time_expected = LiveData(executable.estimate_time_left, Formatter.timedelta_to_string)        
+
+        time_progress_section = Section("Running time", live_time_progress)
+        expected_time_section = Section("Time to finish", live_time_expected)
+        self.cursor = CycleCursor({'0': progress_bar, '1': time_progress_section, '2': expected_time_section, 'visualize': self.visualize, 'back': self.back})
+
+        def cursor_filter(key, elem):
+            return key in ['back', 'visualize']
+
+        self.cursor.set_filter(cursor_filter)
 
         executable.start()
         TaskController.set(self.run)
@@ -47,28 +63,26 @@ class ExecutionController(WindowController):
         def get_window(title):
             return self.window.parent.parent.popup(-5, -5, 'center', title)
 
-        popup = ResultVisualizer(get_window, self.executable)
+        popup = DocumentWindow(get_window, self.executable.get_document, self.executable.get_document_parameters())
         WindowController.add(popup)
 
     def render(self):
+        self.window.title = "Complete" if self.executable.finished else "Executing"
         super().render()
 
-        title = "Complete" if self.executable.finished else "Executing"
-
-        renderer = self.window.internal_renderer
-        title = title.rjust(int((renderer.width+len(title))/2))
-        renderer.addstr(0, 0, title)
-
-        renderer = Renderer(2, -3, 2, 1, renderer)
-
-        self.executable.render(renderer)
-
         if self.executable.finished is True:
-            def renderer_provider(index, pos_y, cursor, item):
-                return 0, None
+            self.back.show()
+            self.visualize.show()
+        else:
+            self.back.hide()
+            self.visualize.hide()
 
-            self.cursor.render(renderer_provider)
+        def renderer_provider(index, pos_y, cursor, item):
+            if pos_y is None:
+                pos_y = 2
 
-        pass
+            return pos_y, Renderer(0, -3, pos_y, 1, self.window.internal_renderer)
+
+        self.cursor.render(renderer_provider)
 
 

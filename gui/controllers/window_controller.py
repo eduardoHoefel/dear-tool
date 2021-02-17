@@ -10,8 +10,16 @@ class WindowController():
         self.window_render_options = window_render_options
         self.s = Storage()
 
-    def render(self):
-        self.window.render(self.window_render_options)
+    def set_active(self, active):
+        self.window.active = active
+
+    def render(self, more_options={}):
+        options = {}
+        options.update(more_options)
+        if self.window_render_options is not None:
+            options.update(self.window_render_options)
+
+        self.window.render(options)
         pass
 
     def input(self, key):

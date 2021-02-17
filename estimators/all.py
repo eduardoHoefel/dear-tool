@@ -17,11 +17,14 @@ def get_all():
 
 def get_all_input_names():
     input_names = {}
+    input_names['name'] = "Name"
     input_names['bins_method'] = "Bins Method"
     input_names['bins'] = "Bins"
     input_names['bin_population'] = "Bin Population"
     input_names['kernel'] = "Kernel"
     input_names['bandwidth'] = "Bandwith"
+    input_names['result'] = "Result"
+    input_names['score'] = "Score"
 
     return input_names
 

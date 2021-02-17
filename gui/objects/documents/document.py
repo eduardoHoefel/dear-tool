@@ -3,6 +3,7 @@ import numpy as np
 from gui.objects.renderable import Renderable
 import gui.objects.keys as Keys
 import gui.colors as Colors
+from gui.objects.cursors.hlist import HListCursor
 
 class ScrollBar(Renderable):
     def __init__(self, view_size, total_size):
@@ -17,7 +18,7 @@ class ScrollBar(Renderable):
         if self.bar_size >= 1:
             return 1
 
-        bar_characters = int(self.bar_size * renderer.height)
+        bar_characters = max(1, round(self.bar_size * renderer.height))
         renderer.addstr(0, 0, "╦")
         for i in range(1, renderer.height):
             if i >= round(self.progress * renderer.height) and i <= bar_characters + round(self.progress * renderer.height):
@@ -29,21 +30,15 @@ class ScrollBar(Renderable):
         return 1
 
 class Word(Renderable):
-    def __init__(self, text, options=None):
+    def __init__(self, text, options={}):
+        self.options = options
         super().__init__()
         self.text = str(text)
-        self.options = options
 
     def render(self, renderer):
         padding = renderer.width - len(self.text)
         to_render = self.text
 
-        if self.options is not None:
-            if 'align' in self.options:
-                if self.options['align'] == 'center':
-                    to_render = "{}{}".format(" " * int(padding/2), self.text)
-                if self.options['align'] == 'right':
-                    to_render = "{}{}".format(" " * int(padding), self.text)
         renderer.addstr(0, 0, to_render, self.options)
         return 1
 
@@ -57,55 +52,107 @@ class Title(Word):
         super().__init__(text, {'align': 'center', 'color': Colors.TITLE, 'bold': True})
 
 class Link(Word):
-    def __init__(self, text, on_click, options={}):
+    def __init__(self, text, url, on_click, options={}):
         super().__init__(text, options)
         self.options['bold'] = True
-        self.options['color'] = Colors.LINK
+        #self.options['color'] = Colors.LINK
         self.on_click = on_click
+        self.url = url
         self.accessed = False
-
-    def focus(self):
-        super().focus()
-        self.options['underline'] = True
-
-    def unfocus(self):
-        super().focus()
-        self.options['underline'] = False
 
     def input(self, key):
         if key in Keys.ENTER:
-            self.on_click()
+            self.on_click(self.url)
             self.accessed = True
-            self.options['color'] = Colors.ACCESSED_LINK
             return True
         return False
 
+    def render(self, renderer):
+        self.options['color'] = Colors.ACCESSED_LINK if self.accessed else Colors.LINK
+        self.options['underline'] = self.focused
+        r = super().render(renderer)
+        del self.options['color']
+        del self.options['underline']
+        return r
+
 class DocumentLine(Renderable):
     def __init__(self, layout, elements):
-        self.elements = elements
+        self.cursor = HListCursor({k: elements[k] for k in range(len(elements))})
         super().__init__()
         self.layout = layout
+        self.basic_margin = 2
 
     def unfocus(self):
         super().unfocus()
-        for e in self.elements:
-            e.unfocus()
+        self.cursor.unfocus()
 
     def focus(self):
         super().focus()
-        for e in self.elements:
-            e.focus()
+        self.cursor.focus()
+
+    def input(self, key):
+        self.cursor.input(key)
+
+    def get_padding(self, i, renderer_width):
+        acc = 0
+        for j in range(i):
+            acc += self.get_width(j, renderer_width)
+            acc += self.basic_margin
+
+        return acc
+
+    def get_width(self, i, renderer_width):
+        width = int(renderer_width * self.layout[i]/12) if i < len(self.layout)-1 else renderer_width - self.get_padding(i, renderer_width)
+        return width
 
     def render(self, renderer):
         acc = 0
-        for i in range(len(self.elements)):
-            width = int(renderer.width * self.layout[i]/12) if i < len(self.elements)-1 else renderer.width - acc
 
-            sub_renderer = Renderer(0, width, 0, acc, renderer)
-            acc += width
-            self.elements[i].render(sub_renderer)
+        def renderer_provider(index, pos_y, cursor, item):
+            width = self.get_width(index, renderer.width)
+            padding = self.get_padding(index, renderer.width)
+            return 0, Renderer(0, width, 0, padding, renderer)
+
+        self.cursor.render(renderer_provider)
 
         return 1
+
+class Table():
+
+    def __init__(self, layout):
+        self.layout = [{'size': v['size'], 'options': {} if 'options' not in v else v['options']} for v in layout]
+        self.lines = []
+
+    def get_line_layout(self):
+        return [x['size'] for x in self.layout]
+
+    def add_row(self, columns):
+        words = []
+        for i in range(len(columns)):
+            obj = columns[i]
+            options = self.layout[i]['options']
+            if obj.options is not None:
+                obj.options.update(options)
+            else:
+                obj.options = {k: v for k, v in options.items()}
+
+            words.append(obj)
+
+        self.lines.append(DocumentLine(self.get_line_layout(), words))
+
+    def add_header(self, columns):
+        words = []
+        for i in range(len(columns)):
+            options = {k: v for k, v in self.layout[i]['options'].items()}
+            options['bold'] = True
+            #options['align'] = 'center'
+            words.append(Word(columns[i], options))
+
+        self.lines.append(DocumentLine(self.get_line_layout(), words))
+
+    def get_lines(self):
+        return self.lines
+
 
 class NewLine(Renderable):
     def __init__(self):
@@ -124,6 +171,20 @@ class Document():
         self.text_parts.append(Title(title))
         self.text_parts.append(NewLine())
         self.text_parts += text_parts
+        self.set_url_opener(None)
+
+    def provide_document_from_url(self, url):
+        return None
+
+    def get_document_provider(self):
+        return self.provide_document_from_url
+
+    def set_url_opener(self, url_opener):
+        self.url_opener = url_opener
+
+    def open(self, url):
+        if self.url_opener is not None:
+            self.url_opener(url)
 
     def get_size(self):
         return len(self.text_parts)

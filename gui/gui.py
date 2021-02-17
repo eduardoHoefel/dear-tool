@@ -47,13 +47,20 @@ class Gui():
 
         self.running = True
         self.had_task = False
+        self.fps = None
         self.update_fps(INPUT_FPS)
 
         while self.running:
             self.render()
             self.tick()
 
+    def is_active(self):
+        return False
+
     def update_fps(self, fps):
+        if fps == self.fps:
+            return
+
         self.fps = fps
         self.update_frequency = 1/self.fps
         self.force_next_render = True
@@ -100,8 +107,11 @@ class Gui():
         self.force_next_render = False
         Renderer.reset_cursor()
         self.win.clear()
+
         for w in self.windows:
+            w.set_active(w == self.windows[-1])
             w.render()
+
         self.refresh()
 
         self.last_render = time.time()

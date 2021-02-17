@@ -100,7 +100,7 @@ class EstimatorController(WindowController):
         execution = EstimatorExecutor(estimator)
 
         def get_window(title):
-            return self.window.internal_renderer.popup(10, 45, 'center', title)
+            return self.window.internal_renderer.popup(12, 45, 'center', title)
 
         popup = ExecutionController(get_window, execution)
         WindowController.add(popup)

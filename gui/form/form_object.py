@@ -12,14 +12,8 @@ class FormObject(Renderable):
         super().reset()
         self.set_value(self.default)
 
-    def is_focused(self):
-        return self.focused
-
     def set_value(self, value):
         pass
-
-    def is_valid(self):
-        return True
 
     def on_change(self, on_change_func):
         self.on_change_do = on_change_func

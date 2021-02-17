@@ -16,13 +16,17 @@ class Renderer():
         self.parent = parent
         self.win = parent.win
         self.name = "Renderer"
+        self.active = False
+
+    def is_active(self):
+        return self.active or self.parent.is_active()
 
     def addstr(self, pos_y, pos_x, text, options=None):
         color = Colors.DEFAULT
         color_options = 0
         hide_cursor = False
         if options is not None:
-            if 'hide_cursor' in options:
+            if 'hide_cursor' in options and self.is_active():
                 hide_cursor = options['hide_cursor']
             if 'color' in options:
                 color = options['color']
@@ -30,6 +34,13 @@ class Renderer():
                 color_options += curses.A_BOLD
             if 'underline' in options and options['underline'] is True:
                 color_options += curses.A_UNDERLINE
+            if 'align' in options:
+                if options['align'] == 'center':
+                    pos_x = round((self.width - len(text))/2)
+                if options['align'] == 'right':
+                    pos_x = self.width - len(text)
+                if options['align'] == 'left':
+                    pos_x = 0
 
         self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color) + color_options)
 

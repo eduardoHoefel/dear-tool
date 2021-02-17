@@ -19,23 +19,28 @@ class Select(FormObject):
         self.going_right = True
 
     def set_value(self, value):
+        import log
+        if value is not None and type(value) != int:
+            log.debug(value)
+            exit()
         self.cursor = value
 
     def move_cursor(self, pos):
         option_dict = self.options_provider()
         if len(option_dict.keys()) == 0:
-            return
+            return False
 
         if pos is None:
             self.cursor = None
             self.going_right = True
-            return
+            return True
 
         if self.cursor is None:
             if pos > 0:
                 self.cursor = 0
                 self.going_right = len(option_dict.keys()) > 1
-            return
+                return True
+            return False
 
         new_pos = self.cursor + pos
         self.going_right = (new_pos > self.cursor)
@@ -49,17 +54,16 @@ class Select(FormObject):
             self.going_right = True
 
         self.cursor = new_pos
+        return True
 
     def handle_input(self, key):
         if not self.enabled:
-            return 
+            return False
 
         if key == 'KEY_LEFT':
-            self.move_cursor(-1)
-            return True
+            return self.move_cursor(-1)
         if key == 'KEY_RIGHT':
-            self.move_cursor(+1)
-            return True
+            return self.move_cursor(+1)
         if key in ('KEY_BACKSPACE', '\b', '\x7f'):
             self.move_cursor(None)
             return True

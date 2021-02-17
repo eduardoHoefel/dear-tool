@@ -13,13 +13,15 @@ class RangeSection(FormObject):
     def __init__(self, name, input_from, input_to):
         self.input_from = input_from
         self.input_to = input_to
+        self.input_to.value = self.input_to.value
         self.input_step = Input(True, pfloat, 1)
 
         section_from = Section("From", input_from)
         section_to = Section("To", input_to)
 
         inputs_section = DoubleSection(section_from, section_to)
-        step_section = Section(name, self.input_step)
+        step_section = Section("Steps", self.input_step)
+        step_section = DoubleSection(Section(name, None), step_section)
 
         self.sections = {0: step_section, 1: inputs_section}
 
