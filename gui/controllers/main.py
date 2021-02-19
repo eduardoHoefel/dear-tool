@@ -2,6 +2,7 @@ from gui.tools import Menu
 from gui.controllers.window_controller import WindowController
 from gui.controllers.estimator import EstimatorController
 from gui.controllers.experiment import ExperimentController
+from gui.controllers.repeated_experiment_analysis import RepeatedExperimentAnalysisController
 import gui.colors as Colors
 
 class MainMenu(WindowController):
@@ -20,7 +21,8 @@ class MainMenu(WindowController):
         self.menu = Menu()
         self.menu.add_option('d', 'Density estimator', self.estimator)
         self.menu.add_option('e', 'Experiment', self.experiment)
-        self.menu.add_option('s', 'Statistal analysis of experiments', self.experiment_statistics)
+        self.menu.add_option('r', 'Repeated experiment analysis', self.repeated_experiment_analysis)
+        self.menu.add_option('p', 'Print results', self.print_results)
 
         self.s.set('datafiles', [])
         self.s.set('executions', [])
@@ -73,5 +75,12 @@ class MainMenu(WindowController):
         popup = ExperimentController(get_window)
         WindowController.add(popup)
 
-    def experiment_statistics(self):
+    def repeated_experiment_analysis(self):
+        def get_window(title):
+            return self.window.internal_renderer.popup(-1, -2, 'bottom', title)
+
+        popup = RepeatedExperimentAnalysisController(get_window)
+        WindowController.add(popup)
+
+    def print_results(self):
         pass

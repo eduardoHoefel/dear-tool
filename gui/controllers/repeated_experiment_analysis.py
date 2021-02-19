@@ -11,18 +11,18 @@ from gui.form.section_break import SectionBreak
 
 import estimators.all as Estimators
 
-from experiment import Experiment
-from executors.executable import ExperimentExecutor
+from repeated_experiment import RepeatedExperiment
+from executors.executable import RepeatedExperimentExecutor
 from gui.controllers.execution import ExecutionController
 
-from datatypes import nfloat, nint, pfloat
+from datatypes import nfloat, nint, pfloat, pint
 
 import log
 
-class ExperimentController(WindowController):
+class RepeatedExperimentAnalysisController(WindowController):
 
     def __init__(self, window_provider):
-        title = "Run experiment"
+        title = "Run repeated experiment"
         super().__init__(title, window_provider)
 
         def window_provider(title):
@@ -30,18 +30,20 @@ class ExperimentController(WindowController):
 
         self.form = FormController(window_provider)
 
-        def datafile_options_provider():
-            datafiles = self.s.get('datafiles')
-            datafile_options = {}
+        iterations_input = Section("Iterations", Input(True, pint, 100))
+        self.form.add_element('iterations', iterations_input)
+        self.form.add_element('break1', SectionBreak())
 
-            for d in datafiles:
-                datafile_options[d] = d
+        samples_input = Section("Syntetic samples", Input(True, pint, 1000))
 
-            return datafile_options
+        self.form.add_element('samples', samples_input)
 
-        datafile_select = Section("Datafile", Select(True, datafile_options_provider))
+        mean_input = Section("Mean", Input(True, float, -2))
+        self.form.add_element('mean', mean_input)
 
-        self.form.add_element('datafile', datafile_select)
+        std_input = Section("Standant deviation", Input(True, pint, 2))
+        self.form.add_element('std', std_input)
+        self.form.add_element('break2', SectionBreak())
 
         def get_estimator_options():
             keys = Estimators.get_all()
@@ -56,10 +58,10 @@ class ExperimentController(WindowController):
 
         estimator_select = Section("Estimator", Select(True, get_estimator_options))
         self.form.add_element('estimator', estimator_select)
-        self.form.add_element('break1', SectionBreak())
+        self.form.add_element('break3', SectionBreak())
 
-        min_parameters = Estimators.get_all_inputs(datafile_select)
-        max_parameters = Estimators.get_all_inputs(datafile_select)
+        min_parameters = Estimators.get_all_inputs(None)
+        max_parameters = Estimators.get_all_inputs(None)
         names = Estimators.get_all_input_names()
 
         simple_parameters = ['bins_method', 'kernel']
@@ -111,12 +113,18 @@ class ExperimentController(WindowController):
 
     def submit(self):
         data = self.form.get_data()
-        datafile = data['datafile']
-        EstimatorClass = data['estimator']
-        parameters = data
 
-        experiment = Experiment(EstimatorClass, datafile, parameters)
-        execution = ExperimentExecutor(experiment)
+        iterations = data['iterations']
+        m = data['mean']
+        s = data['std']
+        samples = data['samples']
+        datafile_parameters = {'m': m, 's': s, 'samples': samples}
+
+        EstimatorClass = data['estimator']
+        estimator_parameters = data
+
+        repeated_experiment = RepeatedExperiment(iterations, EstimatorClass, datafile_parameters, estimator_parameters)
+        execution = RepeatedExperimentExecutor(repeated_experiment)
 
         def get_window(title):
             return self.window.internal_renderer.popup(12, 45, 'center', title)

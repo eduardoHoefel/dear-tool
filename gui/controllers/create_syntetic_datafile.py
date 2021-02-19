@@ -20,7 +20,7 @@ import log
 class CreateSynteticDatafileController(WindowController):
 
     def __init__(self, window_provider):
-        title = "Create Syntetic Datafile:"
+        title = "Create Syntetic Datafile"
         super().__init__(title, window_provider)
 
         def window_provider(title):

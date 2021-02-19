@@ -18,7 +18,7 @@ class Histogram(Estimator):
         self.name = "HIST({})".format(self.bins)
 
     def estimate(self):
-        ys_freq, ys_hist = np.histogram(self.x, bins=9)
+        ys_freq, ys_hist = np.histogram(self.x, bins=self.bins)
         bin_size = ys_hist[1] - ys_hist[0]
 
         p_y = ys_freq / len(self.x)

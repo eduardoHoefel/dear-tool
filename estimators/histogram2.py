@@ -44,7 +44,6 @@ class Histogram2(Estimator):
         if bin_size > 0:
             for p in p_y:
                 if p/bin_size > 0:
-                    print("p: {}, acc: {}, p / bin_size: {}, add: {}".format(p, acc, p / bin_size, p * np.log2(p / bin_size)))
                     acc += p * np.log2(p / bin_size)
 
         return -acc

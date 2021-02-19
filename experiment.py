@@ -32,6 +32,9 @@ class Experiment():
 
         return found_k, found_v, False
 
+    def get_estimator_class_name(self):
+        return 'All' if self.EstimatorClass == 'all' else self.EstimatorClass.get_name()
+
     def prepare(self):
         self.estimators = {}
         if self.EstimatorClass == 'all':
@@ -78,3 +81,19 @@ class Experiment():
             estimators[estimator.name] = estimator
 
         return estimators
+
+    def get_all_scores(self):
+        def sorter(item):
+            v = self.estimators[item].review.score
+            v = 1/v
+            return v
+
+        ranked_estimators = sorted(self.get_estimator_keys(), key=sorter)
+
+        return {k: self.estimators[k].review.score for k in ranked_estimators}
+    
+    def get_name(self):
+        import random
+        import string
+        return self.get_estimator_class_name() + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+

@@ -22,6 +22,8 @@ class Button(WindowController, FormObject):
     def render(self, renderer=None):
         if self.visible():
             super().render()
+        else:
+            return 3
         r1 = self.window.internal_renderer
         color = Colors.ERROR if self.enabled is False else self.default_color
         options = {'color': color, 'bold': True, 'hide_cursor': self.focused, 'underline': self.focused}

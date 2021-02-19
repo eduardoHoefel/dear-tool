@@ -1,7 +1,7 @@
 import time
-from gui.objects.progress_bar import ProgressBar
 from gui.objects.documents.density_estimation_result import DensityEstimationResultDocument
 from gui.objects.documents.experiment_result import ExperimentResultDocument
+from gui.objects.documents.repeated_experiment_result import RepeatedExperimentResultDocument
 
 class Executor():
 
@@ -92,10 +92,6 @@ class ExperimentExecutor(Executor):
         self.experiment = experiment
 
     def step_exec(self, step):
-        if step < 0 or step >= len(self.estimator_keys):
-            #something wrong. lets stop
-            return True
-
         self.experiment.run_estimator(self.estimator_keys[step])
         self.update_progress((step+1)/len(self.estimator_keys))
         return step+1 == len(self.estimator_keys)
@@ -107,3 +103,34 @@ class ExperimentExecutor(Executor):
 
     def get_document(self, parameters=None):
         return ExperimentResultDocument(self.experiment, parameters)
+
+class RepeatedExperimentExecutor(Executor):
+
+    def __init__(self, repeated_experiment):
+        repeated_experiment.prepare()
+        self.experiment_keys = repeated_experiment.get_experiment_keys()
+        self.estimator_keys = repeated_experiment.get_estimator_keys()
+        self.repeated_experiment = repeated_experiment
+        self.total_steps = 1+repeated_experiment.get_total_steps()
+        super().__init__(self.total_steps)
+
+    def step_exec(self, step):
+        if step+1 == self.total_steps:
+            self.repeated_experiment.compute_statistics()
+            return True
+
+        experiment_index = int(step / len(self.estimator_keys))
+        experiment = self.experiment_keys[experiment_index]
+        step = step % len(self.estimator_keys)
+        estimator = self.estimator_keys[step]
+        self.repeated_experiment.run_estimator(experiment, estimator)
+
+        self.update_progress((step+1)/self.total_steps)
+
+        return False
+
+    def get_document_parameters(self):
+        return {'sort_by': ['name', 'score']}
+
+    def get_document(self, parameters=None):
+        return RepeatedExperimentResultDocument(self.repeated_experiment, parameters)
