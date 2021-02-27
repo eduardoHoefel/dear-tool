@@ -23,7 +23,7 @@ class DocumentViewer(WindowController, FormObject):
 
     def get_view(self, scroll_off=0):
         height = self.window.internal_renderer.height
-        view_end = self.view_start + height - 1
+        view_end = self.view_start + height - 3
         if self.cursor is not None:
             if self.cursor.pos - self.view_start < scroll_off:
                 self.view_start -= scroll_off - (self.cursor.pos - self.view_start)

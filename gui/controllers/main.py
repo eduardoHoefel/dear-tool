@@ -3,6 +3,7 @@ from gui.controllers.window_controller import WindowController
 from gui.controllers.estimator import EstimatorController
 from gui.controllers.experiment import ExperimentController
 from gui.controllers.repeated_experiment_analysis import RepeatedExperimentAnalysisController
+from gui.controllers.pde_contest import PDEContestController
 import gui.colors as Colors
 
 class MainMenu(WindowController):
@@ -22,7 +23,7 @@ class MainMenu(WindowController):
         self.menu.add_option('d', 'Density estimator', self.estimator)
         self.menu.add_option('e', 'Experiment', self.experiment)
         self.menu.add_option('r', 'Repeated experiment analysis', self.repeated_experiment_analysis)
-        self.menu.add_option('p', 'Print results', self.print_results)
+        self.menu.add_option('p', 'PDE contest', self.pde_contest)
 
         self.s.set('datafiles', [])
         self.s.set('executions', [])
@@ -82,5 +83,9 @@ class MainMenu(WindowController):
         popup = RepeatedExperimentAnalysisController(get_window)
         WindowController.add(popup)
 
-    def print_results(self):
-        pass
+    def pde_contest(self):
+        def get_window(title):
+            return self.window.internal_renderer.popup(-1, -2, 'bottom', title)
+
+        popup = PDEContestController(get_window)
+        WindowController.add(popup)

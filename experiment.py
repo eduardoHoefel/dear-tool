@@ -40,7 +40,8 @@ class Experiment():
         if self.EstimatorClass == 'all':
             for estimator in EstimatorsMother.get_all():
                 #if we are running all estimators, its best to not have fancy parameters
-                self.estimators.update(self.get_estimator_all_executions(estimator, {}))
+                temp_e = self.get_estimator_all_executions(estimator, {})
+                self.estimators[estimator.get_name()] = temp_e[list(temp_e.keys())[0]]
         else:
             self.estimators = self.get_estimator_all_executions(self.EstimatorClass, self.parameters)
 
@@ -52,6 +53,15 @@ class Experiment():
         e.run()
         if self.real_value is not None:
             e.analyse(self.real_value)
+
+        #if key == self.get_estimator_keys()[-1]:
+        #    import log
+        #    ordered_estimators = sorted(self.get_estimator_keys(), key=lambda k: self.estimators[k].review.estimation)
+        #    for i in range(len(ordered_estimators)):
+        #        e = ordered_estimators[i]
+        #        log.debug("{},\t {},\t {},\t {}".format(i+1, self.estimators[e].bin_population, self.estimators[e].review.score, self.estimators[e].review.estimation))
+        #    exit()
+
 
 
     def get_estimator_all_executions(self, EstimatorClass, parameters):
@@ -85,12 +95,19 @@ class Experiment():
     def get_all_scores(self):
         def sorter(item):
             v = self.estimators[item].review.score
-            v = 1/v
+            if type(v) == str:
+                return 0
+
+            v = 1/v if v > 0 else 1000000
             return v
 
         ranked_estimators = sorted(self.get_estimator_keys(), key=sorter)
 
+
         return {k: self.estimators[k].review.score for k in ranked_estimators}
+
+    def get_all_results(self):
+        return {k: v.review.estimation for k, v in self.estimators.items()}
     
     def get_name(self):
         import random

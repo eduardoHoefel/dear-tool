@@ -19,8 +19,8 @@ class RepeatedExperimentResultDocument(Document):
         self.statistics = repeated_experiment.statistics
         estimations = list(self.statistics.keys())
 
-        table = Table([{'size': 2, 'options': {'align': 'left'}}, {'size': 8, 'options': {'align': 'left'}}, {'size': 2, 'options': {'align': 'center'}}])
-        table.add_header(['No.', 'Name', 'Score'])
+        table = Table([{'size': 2, 'options': {'align': 'left'}}, {'size': 4, 'options': {'align': 'left'}}, {'size': 3, 'options': {'align': 'center'}}, {'size': 3, 'options': {'align': 'center'}}])
+        table.add_header(['No.', 'Name', 'Avg Pos', 'Trust'])
 
         if parameters is not None and 'sort_by' in parameters:
             sort_key = parameters['sort_by']
@@ -30,7 +30,7 @@ class RepeatedExperimentResultDocument(Document):
             def sorter(item):
                 v = self.statistics[item][sort_key]
                 if sort_key == 'score':
-                    v = 1/v
+                    v = 1/v if v > 0 else 1000000
                 return v
 
             estimations = sorted(estimations, key=sorter)
@@ -38,7 +38,7 @@ class RepeatedExperimentResultDocument(Document):
         for i in range(len(estimations)):
             name = estimations[i]
             s = self.statistics[name]
-            table.add_row([Word(str(i+1).rjust(len(str(len(estimations))))), Link(name, name, self.open), Result(s['score'])])
+            table.add_row([Word(str(i+1).rjust(len(str(len(estimations))))), Link(name, name, self.open), Result(s['avg_pos']), Word(s['score'])])
 
         text_parts += table.get_lines()
 

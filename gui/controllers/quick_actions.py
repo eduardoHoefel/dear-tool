@@ -1,11 +1,11 @@
 from gui.controllers.window_controller import WindowController
-from gui.controllers.create_syntetic_datafile import CreateSynteticDatafileController
+from gui.controllers.create_synthetic_datafile import CreateSyntheticDatafileController
 import gui.objects.keys as Keys
 
 class QuickActionsMenu(WindowController):
 
     def __init__(self, window_provider, main_window):
-        title = "[q] Quit  [i] Import datafile [c] Create syntetic datafile"
+        title = "[q] Quit  [i] Import datafile [c] Create synthetic datafile"
         super().__init__(title, window_provider)
         self.main_window = main_window
 
@@ -21,7 +21,7 @@ class QuickActionsMenu(WindowController):
             def window_provider(title):
                 return self.main_window.popup(11, 45, 'center', title)
 
-            popup = CreateSynteticDatafileController(window_provider)
+            popup = CreateSyntheticDatafileController(window_provider)
             WindowController.add(popup)
 
 
@@ -29,4 +29,4 @@ class QuickActionsMenu(WindowController):
     def render(self):
         super().render()
         #r1 = self.window.internal_renderer
-        #r1.addstr(0, 0, "[q] Quit  [i] Import datafile [c] Create syntetic datafile")
+        #r1.addstr(0, 0, "[q] Quit  [i] Import datafile [c] Create synthetic datafile")

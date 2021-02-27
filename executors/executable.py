@@ -2,6 +2,8 @@ import time
 from gui.objects.documents.density_estimation_result import DensityEstimationResultDocument
 from gui.objects.documents.experiment_result import ExperimentResultDocument
 from gui.objects.documents.repeated_experiment_result import RepeatedExperimentResultDocument
+from gui.objects.plot.experiment import ExperimentPlotDataController
+from gui.objects.plot.repeated_experiment import RepeatedExperimentPlotDataController
 
 class Executor():
 
@@ -41,7 +43,7 @@ class Executor():
         return self.progress
 
     def estimate_time_left(self):
-        return self.get_avg_step_time() * (self.get_total_steps() - self.get_steps())
+        return 0 if self.steps_taken is 0 else (self.get_running_time() / self.steps_taken) * (self.total_steps - self.steps_taken)
 
     def get_total_steps(self):
         return self.total_steps
@@ -99,7 +101,8 @@ class ExperimentExecutor(Executor):
     def get_document_parameters(self):
         experiment_parameters = list(self.experiment.parameters.keys())
         default_sort_by = ['name', 'result', 'score']
-        return {'sort_by': default_sort_by + experiment_parameters}
+        plot_parameters = ExperimentPlotDataController(self.experiment)
+        return {'sort_by': default_sort_by + experiment_parameters, 'plot': plot_parameters}
 
     def get_document(self, parameters=None):
         return ExperimentResultDocument(self.experiment, parameters)
@@ -121,8 +124,8 @@ class RepeatedExperimentExecutor(Executor):
 
         experiment_index = int(step / len(self.estimator_keys))
         experiment = self.experiment_keys[experiment_index]
-        step = step % len(self.estimator_keys)
-        estimator = self.estimator_keys[step]
+        est_step = step % len(self.estimator_keys)
+        estimator = self.estimator_keys[est_step]
         self.repeated_experiment.run_estimator(experiment, estimator)
 
         self.update_progress((step+1)/self.total_steps)
@@ -130,7 +133,8 @@ class RepeatedExperimentExecutor(Executor):
         return False
 
     def get_document_parameters(self):
-        return {'sort_by': ['name', 'score']}
+        plot_parameters = RepeatedExperimentPlotDataController(self.repeated_experiment)
+        return {'sort_by': ['name', 'score'], 'plot': plot_parameters}
 
     def get_document(self, parameters=None):
         return RepeatedExperimentResultDocument(self.repeated_experiment, parameters)

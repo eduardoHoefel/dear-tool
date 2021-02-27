@@ -34,7 +34,7 @@ class RepeatedExperimentAnalysisController(WindowController):
         self.form.add_element('iterations', iterations_input)
         self.form.add_element('break1', SectionBreak())
 
-        samples_input = Section("Syntetic samples", Input(True, pint, 1000))
+        samples_input = Section("Synthetic samples", Input(True, pint, 1000))
 
         self.form.add_element('samples', samples_input)
 

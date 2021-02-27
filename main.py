@@ -1,7 +1,7 @@
 import log
 from gui.gui import Gui
 
-from datafiles.syntetic import SynteticDatafile
+from datafiles.synthetic import SyntheticDatafile
 import os
 os.environ.setdefault('ESCDELAY', '25')
 

@@ -12,6 +12,7 @@ import estimators.all as Estimators
 from gui.form.section import Section
 from gui.form.select import Select
 from gui.window import Renderer
+from gui.controllers.plot import PlotController
 
 class DocumentWindow(WindowController):
 
@@ -20,11 +21,10 @@ class DocumentWindow(WindowController):
         self.window_options = window_options
         self.document_provider = document_provider
 
-
         def back_window_provider(title):
             return self.window.internal_renderer.popup(3, 4+len("Back"), 'top', title)
 
-        self.back = Button("Back", back_window_provider, self.on_back)
+        back = Button("Back", back_window_provider, self.on_back)
 
 
         def viewer_window_provider(title):
@@ -32,6 +32,18 @@ class DocumentWindow(WindowController):
 
         self.document_viewer = DocumentViewer(viewer_window_provider)
         self.prepare_document()
+
+        extra_elements = {'back': back}
+        starting_cursor_pos = 'back'
+
+        if 'plot' in window_options.keys():
+
+            def plot_window_provider(title):
+                return Window(title, 3, 4+len("Plot"), 0, 5+len("Back"), self.window.internal_renderer)
+
+            plot = Button("Plot", plot_window_provider, self.on_plot(window_options['plot']))
+            extra_elements['plot'] = plot
+            starting_cursor_pos = 'plot'
 
         if 'sort_by' in window_options.keys():
             sort_option_keys = window_options['sort_by']
@@ -46,11 +58,14 @@ class DocumentWindow(WindowController):
             select.on_change(on_select_change)
             select.changed()
 
-            self.cursor = VListCursor({'buttons': HListCursor({'back': self.back, 'sort': section}) , 'document_viewer': self.document_viewer})
-            self.cursor.current().go_to('sort')
+            extra_elements['sort'] = section
+            starting_cursor_pos = 'sort'
 
+        if len(list(extra_elements.keys())) > 1:
+            self.cursor = VListCursor({'buttons': HListCursor(extra_elements) , 'document_viewer': self.document_viewer})
+            self.cursor.current().go_to(starting_cursor_pos)
         else:
-            self.cursor = CycleCursor({'document_viewer': self.document_viewer, 'back': self.back})
+            self.cursor = CycleCursor({'document_viewer': self.document_viewer, 'back': back})
 
     def prepare_document(self, parameters=None):
         document = self.document_provider(parameters)
@@ -75,6 +90,18 @@ class DocumentWindow(WindowController):
     def on_back(self):
         self.remove()
 
+    def on_plot(self, plot_parameters):
+        def plot_start():
+
+            def get_window(title):
+                return self.window.parent.parent.popup(0, 0, 'center', title)
+
+            popup = PlotController(get_window, plot_parameters)
+            WindowController.add(popup)
+
+        return plot_start
+
+
     def input(self, key):
         return self.cursor.input(key)
 
@@ -82,7 +109,7 @@ class DocumentWindow(WindowController):
         super().render()
 
         def renderer_provider(index, pos_y, cursor, item):
-            padding = 10
+            padding = 17
             if pos_y is None:
                 pos_y = 0
             return pos_y, Renderer(1, -padding-2, 1, padding, self.window.internal_renderer)

@@ -14,8 +14,18 @@ class Histogram(Estimator):
 
         self.x = datafile.data
         self.bins_method = parameters['bins_method'] if 'bins_method' in parameters else 'default'
-        self.bins = 10 if self.bins_method == 'default' else parameters['bins'] if self.bins_method == 'manual' else self.bins_method
-        self.name = "HIST({})".format(self.bins)
+        self.bins = 'auto' if self.bins_method == 'default' else parameters['bins'] if self.bins_method == 'manual' else self.bins_method
+        self.name = "HIST({} [{}])".format(str(self.bins).rjust(5), 'AUTO' if self.is_auto(self.bins) else 'MANUAL')
+
+    def get_bin_size(self, bins):
+        ys_freq, ys_hist = np.histogram(self.x, bins=bins)
+        bin_size = ys_hist[1] - ys_hist[0]
+        return bin_size
+
+    def is_auto(self, bins):
+        b1 = self.get_bin_size('auto')
+        b2 = self.get_bin_size(bins)
+        return b1 == b2
 
     def estimate(self):
         ys_freq, ys_hist = np.histogram(self.x, bins=self.bins)

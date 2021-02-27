@@ -11,16 +11,16 @@ from gui.tools import Menu
 from estimators.known_formula import KnownFormula
 from estimators.real import Real
 
-from datafiles.syntetic import SynteticDatafile
+from datafiles.synthetic import SyntheticDatafile
 
 from datatypes import myfloat, nfloat
 
 import log
 
-class CreateSynteticDatafileController(WindowController):
+class CreateSyntheticDatafileController(WindowController):
 
     def __init__(self, window_provider):
-        title = "Create Syntetic Datafile"
+        title = "Create Synthetic Datafile"
         super().__init__(title, window_provider)
 
         def window_provider(title):
@@ -64,6 +64,6 @@ class CreateSynteticDatafileController(WindowController):
         if datafiles is None:
             datafiles = []
 
-        datafiles.append(SynteticDatafile(m, s, samples))
+        datafiles.append(SyntheticDatafile(m, s, samples))
         self.s.set('datafiles', datafiles)
         self.remove()

@@ -73,6 +73,8 @@ class Input(FormObject):
         self.value = str(value)
 
     def get_value(self):
+        if not self.enabled:
+            return None
         try:
             return self.inp_type(self.value)
         except:
