@@ -92,9 +92,7 @@ class RepeatedExperiment():
             s['std_pos'] = np.std(e_pos)
             s['score'] = int(1000*(len(e_diffs) - sum(e_diffs)/len(estimators))/(self.iterations))
             if s['score'] < 0:
-                import log
-                log.debug(e_diffs)
-                exit()
+                s['score'] = 0
             s['pos'] = s['avg_pos']
             s['sample'] = list(self.experiments.values())[0].estimators[e]
             s['name'] = s['sample'].name
@@ -112,3 +110,9 @@ class RepeatedExperiment():
 
     def run_estimator(self, experiment, estimator):
         self.experiments[experiment].run_estimator(estimator)
+
+    def run_all(self):
+        for e in self.experiments.values():
+            e.run_all()
+
+

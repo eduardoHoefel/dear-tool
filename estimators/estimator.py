@@ -30,3 +30,27 @@ class Estimator():
 
     def estimate(self):
         return 0
+
+    def get_parameter_range(E, parameter, datafile, window):
+        expected = datafile.density
+
+        left = None
+        last_density = None
+        direction = None
+        #print(expected)
+        while True:
+            right = 0 if left is None else int(left+window/2)
+            p = {parameter: right}
+            e = E(datafile, p)
+            r = e.estimate()
+            #print("{}: {}".format(p, r))
+            if last_density is not None:
+                if r == expected or ((expected - last_density) / (expected - r)) < 0:
+                    return {'from': left, 'to': left + window, 'step': 1}
+                if direction is not None and direction / (r - last_density) < 0:
+                    return {'from': int(left - window/2), 'to': int(left+window/2), 'step': 1}
+
+                direction = r - last_density
+            last_density = r
+            left = right
+

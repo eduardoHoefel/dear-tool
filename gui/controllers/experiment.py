@@ -63,7 +63,7 @@ class ExperimentController(WindowController):
         names = Estimators.get_all_input_names()
 
         simple_parameters = ['bins_method', 'kernel']
-        range_parameters = ['bins', 'bin_population', 'bandwidth']
+        range_parameters = ['neighbors', 'bins', 'bin_population', 'bandwidth']
         for p in simple_parameters:
             self.form.add_element(p, Section(names[p], min_parameters[p]))
 

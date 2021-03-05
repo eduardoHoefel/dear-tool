@@ -8,6 +8,8 @@ from gui.controllers.quick_actions import QuickActionsMenu
 from gui.window import Window, Renderer
 from storage import Storage
 
+import gui.colors as Colors
+
 import time
 
 TASK_FPS = 1
@@ -29,8 +31,8 @@ class Gui():
 
         curses.start_color()
         curses.use_default_colors()
-        for i in range(0, curses.COLORS):
-            curses.init_pair(i + 1, i, -1)
+        for c in Colors.ALL:
+            curses.init_pair(c[0], c[1], c[2])
 
         stdscr.clear()
 

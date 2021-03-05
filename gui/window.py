@@ -42,7 +42,7 @@ class Renderer():
                 if options['align'] == 'left':
                     pos_x = 0
 
-        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color) + color_options)
+        self.win.addstr(pos_y+self.begin_y, pos_x+self.begin_x, str(text), curses.color_pair(color[0]) + color_options)
 
         if hide_cursor is True:
             curses.curs_set(0)
@@ -61,7 +61,7 @@ class Renderer():
 
         if options is not None:
             if 'merge_top_borders' in options:
-                self.addstr(0, 0, "├")
+                self.addstr(0, 0, "├", {'color': Colors.WHITE})
                 self.addstr(0, self.width-1, "┤")
         #self.win.addstr(self.end_y, self.begin_x, "{} [{}, {}, {}, {}]({}x{})".format(self.name, self.begin_y, self.end_y, self.begin_x, self.end_x, self.height, self.width))
 

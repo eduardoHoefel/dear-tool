@@ -130,7 +130,7 @@ class RepeatedExperimentExecutor(Executor):
 
         self.update_progress((step+1)/self.total_steps)
 
-        return False
+        return step+1 == self.total_steps
 
     def get_document_parameters(self):
         plot_parameters = RepeatedExperimentPlotDataController(self.repeated_experiment)

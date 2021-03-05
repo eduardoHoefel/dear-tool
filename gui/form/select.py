@@ -19,10 +19,6 @@ class Select(FormObject):
         self.going_right = True
 
     def set_value(self, value):
-        import log
-        if value is not None and type(value) != int:
-            log.debug(value)
-            exit()
         self.cursor = value
 
     def move_cursor(self, pos):

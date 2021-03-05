@@ -21,6 +21,7 @@ class Kernel(Estimator):
     def estimate(self):
 
         kde = KernelDensity(bandwidth=self.bandwidth, kernel=self.kernel).fit(self.x[:, np.newaxis])
-        p_x = np.exp(kde.score_samples(self.x[:, np.newaxis]))
+        r = kde.score_samples(self.x[:, np.newaxis])
+        p_x = np.exp(r)
 
         return -np.mean(np.where(p_x > 0, np.log2(p_x), 0))

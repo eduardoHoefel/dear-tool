@@ -47,6 +47,10 @@ class Experiment():
 
     def get_estimator_keys(self):
         return list(self.estimators.keys())
+    
+    def run_all(self):
+        for k in self.estimators.keys():
+            self.run_estimator(k)
 
     def run_estimator(self, key):
         e = self.estimators[key]

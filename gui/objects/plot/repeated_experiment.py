@@ -53,10 +53,6 @@ class RepeatedExperimentPlotDataController(PlotDataController):
     def prepare(self, x, y, style):
         for line_name, line_data in self.get_lines(x, y).items():
             labels, data = line_data
-            import log
-            log.debug("line: {}".format(line_name))
-            log.debug(labels)
-            log.debug(data)
 
             self.add_data(labels, data, line_name, style)
 

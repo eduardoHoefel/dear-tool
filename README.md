@@ -1,9 +1,9 @@
-# Density Estimators Research in Python
+# Density Estimators Analysis Research Tool
 
 <!--[![Current release](https://img.shields.io/github/release/eduardohoefel/jael.svg)](https://github.com/eduardohoefel/jael/releases)-->
 
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/eduardohoefel/derp.svg)
-[![LICENSE](https://img.shields.io/github/license/eduardoHoefel/derp.svg)](https://github.com/eduardohoefel/derp/LICENSE)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/eduardohoefel/dear-tool.svg)
+[![LICENSE](https://img.shields.io/github/license/eduardoHoefel/dear-tool.svg)](https://github.com/eduardohoefel/dear-tool/LICENSE)
 
 ## About
 

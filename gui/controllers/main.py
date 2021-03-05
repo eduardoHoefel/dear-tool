@@ -4,19 +4,13 @@ from gui.controllers.estimator import EstimatorController
 from gui.controllers.experiment import ExperimentController
 from gui.controllers.repeated_experiment_analysis import RepeatedExperimentAnalysisController
 from gui.controllers.pde_contest import PDEContestController
+from gui.static.textfile_reader import TextfileReader
 import gui.colors as Colors
 
 class MainMenu(WindowController):
 
     def __init__(self, window_provider):
-        title = []
-
-        title.append("█████╗        ███████╗          ██████╗            ██████╗")
-        title.append("█╔══██╗       ██╔════╝          ██╔══██╗           ██╔══██╗")
-        title.append("█║  ██║       █████╗            ██████╔╝           ██████╔╝")
-        title.append("█║  ██║       ██╔══╝            ██╔══██╗           ██╔═══╝")
-        title.append("█████╔╝       ███████╗          ██║  ██║           ██║")
-        title.append("╚════╝ ensity ╚══════╝stimators ╚═╝  ╚═╝esearch in ╚═╝ython ")
+        title = TextfileReader.read("resources/title.txt")
 
         super().__init__(title, window_provider, window_render_options={'merge_top_borders': True, 'color': Colors.BIG_TITLE})
         self.menu = Menu()
