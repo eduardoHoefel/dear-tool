@@ -16,7 +16,8 @@ class Kernel(Estimator):
         self.x = datafile.data
         self.kernel = parameters['kernel'] if 'kernel' in parameters else 'gaussian'
         self.bandwidth = parameters['bandwidth'] if 'bandwidth' in parameters else 0.4
-        self.name = "KDE({}, {})".format(self.kernel, self.bandwidth)
+        self.id = "KDE({}, {})".format(self.kernel, self.bandwidth)
+        self.name = self.id
 
     def estimate(self):
 
@@ -24,4 +25,4 @@ class Kernel(Estimator):
         r = kde.score_samples(self.x[:, np.newaxis])
         p_x = np.exp(r)
 
-        return -np.mean(np.where(p_x > 0, np.log2(p_x), 0))
+        return self.get_shannon_entropy(p_x)

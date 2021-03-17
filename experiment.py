@@ -53,6 +53,11 @@ class Experiment():
             self.run_estimator(k)
 
     def run_estimator(self, key):
+        if key not in self.estimators.keys():
+            import log
+            log.debug(key)
+            log.debug(self.estimators.keys())
+            exit()
         e = self.estimators[key]
         e.run()
         if self.real_value is not None:
@@ -88,11 +93,11 @@ class Experiment():
                     estimators.update(self.get_estimator_all_executions(EstimatorClass, p2))
                 else:
                     estimator = EstimatorClass(self.datafile, p2)
-                    estimators[estimator.name] = estimator
+                    estimators[estimator.id] = estimator
 
         else:
             estimator = EstimatorClass(self.datafile, parameters)
-            estimators[estimator.name] = estimator
+            estimators[estimator.id] = estimator
 
         return estimators
 

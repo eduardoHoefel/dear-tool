@@ -1,7 +1,6 @@
 
 from estimators.adaptive_histogram import AdaptiveHistogram
 from estimators.crude import Crude
-from estimators.histogram2 import Histogram2
 from estimators.histogram import Histogram
 from estimators.kernel import Kernel
 from estimators.known_formula import KnownFormula

@@ -15,6 +15,7 @@ class Histogram(Estimator):
         self.x = datafile.data
         self.bins_method = parameters['bins_method'] if 'bins_method' in parameters else 'default'
         self.bins = 'auto' if self.bins_method == 'default' else parameters['bins'] if self.bins_method == 'manual' else self.bins_method
+        self.id = "HIST({})".format(str(self.bins).rjust(5))
         self.name = "HIST({} [{}])".format(str(self.bins).rjust(5), 'AUTO' if self.is_auto(self.bins) else 'MANUAL')
 
     def get_bin_size(self, bins):
@@ -27,16 +28,18 @@ class Histogram(Estimator):
         b2 = self.get_bin_size(bins)
         return b1 == b2
 
+    def get_shannon_entropy(self, c, bin_sizes=1):
+        c = c / np.sum(c)
+        c = c[np.nonzero(c)]
+
+        H = -sum(c * np.log2(c / bin_sizes))
+
+        return H
+
     def estimate(self):
         ys_freq, ys_hist = np.histogram(self.x, bins=self.bins)
         bin_size = ys_hist[1] - ys_hist[0]
+        if bin_size == 0:
+            return 0
 
-        p_y = ys_freq / len(self.x)
-
-        acc = 0
-        if bin_size > 0:
-            for p in p_y:
-                if p/bin_size > 0:
-                    acc += p * np.log2(p / bin_size)
-
-        return -acc
+        return self.get_shannon_entropy(ys_freq, bin_size)

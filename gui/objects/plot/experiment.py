@@ -15,7 +15,7 @@ class ExperimentPlotDataController(PlotDataController):
 
     def get_x_axis_tick_labels(self, x):
         if x == 'estimator':
-            return self.experiment.get_estimator_keys()
+            return [e.name for e in self.experiment.estimators.values()]
         return ['']
 
     def get_lines(self, y):
@@ -24,13 +24,13 @@ class ExperimentPlotDataController(PlotDataController):
         lines_data = []
         auto_estimator_lines = []
         auto_estimator = False
-        for name in estimators:
-            e = self.experiment.estimators[name]
+        for key in estimators:
+            e = self.experiment.estimators[key]
             data = ''
             if y == 'result':
                 data = e.review.estimation
 
-            if "AUTO" in name:
+            if "AUTO" in e.name:
                 auto_estimator_lines.append(data)
                 lines_data.append(None)
                 auto_estimator = True

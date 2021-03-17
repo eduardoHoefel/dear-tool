@@ -16,8 +16,7 @@ p_k/=number_classes
 
 
 #defining the values for p(l|k), for the 4 different values of k
-norm_params = np.array([[0, 0.1],[0,0.1], [0, 0.1], [0, 0.1]])
-#norm_params = np.array([[0, 0.1],[1, .1],[2, .1], [3, .1]])
+norm_params = np.array([[0, 0.3],[0.2,0.6], [-0.5, 0.1], [1, 2.8]])
 
 #######################################
 
@@ -34,7 +33,6 @@ def measure_data(p_k,norm_params,number_samples=100):
         data[k]= ss.norm.rvs(*(norm_params[k]),size=number_samples)
     return data
 
-true_data=measure_data(p_k, norm_params)
 
 #######################################
 
@@ -55,9 +53,22 @@ def visualize_distribution_points(data_dictionary, b='auto'):
     plt.legend()
     plt.show()
 
+#true_data=measure_data(p_k, norm_params)
 #visualize_distribution_points(true_data)
 
 #######################################
+
+def print_format(l, cont=False):
+    x = str(len(l))
+    if type(l[0]) in [list, np.ndarray]:
+        x = "{} x {}".format(x, print_format(l[0], True))
+
+    if cont == False:
+        print("[{}]".format(x))
+    else:
+        return x
+
+
 
 def information(p_k,data,model):
     """
@@ -71,17 +82,21 @@ def information(p_k,data,model):
     """
     N_k = len(p_k)              #N_k is the number of possible values for $K$
     acc = entropy(p_k,base=2)   #we initialize the value with H(K)
+    acc2 = entropy(p_k,base=2)   #we initialize the value with H(K)
     for k in range(N_k):
         l = data[k]
         p_l_k = np.zeros((N_k,len(l)))
         for k_star in range(N_k):
-            p_l_k[k_star,:] = ss.norm.pdf(l,*(model[k_star]))
+            a = ss.norm.pdf(l,*(model[k_star]))
+            p_l_k[k_star,:] = a
         p_l=np.sum(p_k*(p_l_k).T,axis=1)
         p_k_l =  p_k[k]*p_l_k[k,:]/ p_l
-        acc += p_k[k] * np.mean(np.log2(p_k_l))
+        acc += p_k[k] * np.mean(np.where(p_k_l != 0, np.log2(p_k_l), 0))
+
     return acc
+
 import statsmodels.api as sm
 
-data=measure_data(p_k, norm_params, number_samples=10000)
+data=measure_data(p_k, norm_params, number_samples=1000)
 MI = information(p_k,data,norm_params)
 print("MI is %f"%(MI))

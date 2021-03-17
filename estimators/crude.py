@@ -15,6 +15,7 @@ class Crude(Estimator):
 
         self.x = datafile.data
         self.name = 'crude'
+        self.id = name
 
     def run(self):
         self.output = self.estimate()
@@ -24,4 +25,4 @@ class Crude(Estimator):
         true_std_deviation = np.std(self.x)
 
         p_x = sc.stats.norm.pdf(self.x, true_mean, true_std_deviation)
-        return -np.mean(np.where(p_x != 0, np.log2(p_x), 0))
+        return self.get_shannon_entropy(p_x)

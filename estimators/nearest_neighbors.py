@@ -16,6 +16,7 @@ class NN(Estimator):
 
         self.data = datafile.data
         self.choose_method(parameters)
+        self.id = "NN({})".format(str(self.neighbors).rjust(5))
         self.name = "NN({} [{}])".format(str(self.neighbors).rjust(5), "AUTO" if self.neighbors == self.get_auto_neighbors() else "MANUAL")
 
     def choose_method(self, parameters):
@@ -45,14 +46,13 @@ class NN(Estimator):
         return round(math.pow(x, power_x) * math.pow(y, power_y) * fraction_m)
 
     def estimate(self):
+        self.data.sort()
+
         if self.neighbors == 0:
             return 0
 
         nbrs = NearestNeighbors(n_neighbors=self.neighbors+1, algorithm='ball_tree').fit(self.data[:, np.newaxis])
         distances, indices = nbrs.kneighbors(self.data[:, np.newaxis])
-        p_x = np.array([x[-1] for x in distances])
-        p1 = np.log2(p_x)
-        p2 = np.where(p_x > 0, p1, 0)
-        r =  -np.mean(p2)
 
-        return r
+        p_x = np.array([x[-1] for x in distances])
+        return self.get_shannon_entropy(p_x)

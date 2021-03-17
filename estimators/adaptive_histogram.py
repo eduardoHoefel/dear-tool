@@ -1,7 +1,8 @@
 import numpy as np
 from estimators.estimator import Estimator
+from estimators.histogram import Histogram
 
-class AdaptiveHistogram(Estimator):
+class AdaptiveHistogram(Histogram):
 
     def get_name():
         return "Adaptive Histogram"
@@ -15,6 +16,7 @@ class AdaptiveHistogram(Estimator):
 
         self.x = datafile.data
         self.choose_method(parameters)
+        self.name = "AH({})".format(str(self.bin_population).rjust(5))
         self.name = "AH({} [{}])".format(str(self.bin_population).rjust(5), "AUTO" if self.bin_population == self.get_auto_bin_population() else "MANUAL")
 
     def choose_method(self, parameters):
@@ -77,12 +79,4 @@ class AdaptiveHistogram(Estimator):
         ys_hist[-1] = right_border - left_border
         ys_freq[-1] = len(bins[-1])
 
-        p_y = ys_freq / len(self.x)
-
-        acc = 0
-        it = np.nditer(p_y, flags=['f_index'])
-        for p in it:
-            if ys_hist[it.index] != 0 and p / ys_hist[it.index] != 0:
-                acc += p * np.log2(p / ys_hist[it.index])
-
-        return -acc
+        return self.get_shannon_entropy(ys_freq, ys_hist)

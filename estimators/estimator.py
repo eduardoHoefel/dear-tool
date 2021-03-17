@@ -1,4 +1,5 @@
 from estimators.analysis import EstimationAnalysis
+import numpy as np
 
 class Estimator():
 
@@ -12,6 +13,12 @@ class Estimator():
 
     def analyse(self, real_value):
         self.review = EstimationAnalysis(self.output, real_value)
+
+    def get_shannon_entropy(self, c, bin_sizes=1):
+        c = c[np.nonzero(c)]
+        H = -np.mean(np.log2(c))
+
+        return H
 
     def get_sort_value(self, key):
         if key == 'name':

@@ -15,7 +15,7 @@ class RepeatedExperimentPlotDataController(PlotDataController):
 
     def get_x_axis_tick_labels(self, x):
         if x == 'estimator':
-            return self.repeated_experiment.get_estimator_keys()
+            return [e.name for e in self.repeated_experiment.estimators.values()]
         if x == 'samples':
             return self.repeated_experiment.get_samples()
         return ['']
@@ -24,8 +24,8 @@ class RepeatedExperimentPlotDataController(PlotDataController):
         if x == 'estimator':
             estimators = self.repeated_experiment.get_estimator_keys()
             line_data = []
-            for name in estimators:
-                e = self.repeated_experiment.statistics[name]
+            for key in estimators:
+                e = self.repeated_experiment.statistics[key]
                 data = ''
                 if y == 'result':
                     data = e['avg_result']
@@ -41,11 +41,12 @@ class RepeatedExperimentPlotDataController(PlotDataController):
             samples = self.repeated_experiment.get_samples()
             estimators = self.repeated_experiment.get_estimator_keys()
             lines = {}
-            for name in estimators:
+            for key in estimators:
+                name = self.repeated_experiment.experiments.estimators[key].name
                 if y == 'result':
-                    line_data = list(self.repeated_experiment.results[name].values())
+                    line_data = list(self.repeated_experiment.results[key].values())
                 if y == 'score':
-                    line_data = list(self.repeated_experiment.scores[name].values())
+                    line_data = list(self.repeated_experiment.scores[key].values())
                 lines[name] = (samples, line_data)
 
             return lines

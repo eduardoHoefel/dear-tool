@@ -22,7 +22,8 @@ class DensityEstimationResultDocument(Document):
             text_parts.append(report_line("Known density: ", datafile.density))
 
         text_parts.append(NewLine())
-        text_parts.append(report_line("Density Estimation: ", estimator.output))
+        text_parts.append(report_line("Density Estimator: ", estimator.name))
+        text_parts.append(report_line("Shannon entropy: ", estimator.output))
         if datafile.density is not None:
             estimator.analyse(datafile.density)
             review = estimator.review

@@ -33,6 +33,7 @@ class KnownFormula(Estimator):
 
         self.g_log = create_g_log(f, x, m, s)
         self.name = "known"
+        self.id = self.name
 
     def estimate(self):
 
