@@ -28,7 +28,7 @@ class Histogram(Estimator):
         b2 = self.get_bin_size(bins)
         return b1 == b2
 
-    def get_shannon_entropy(self, c, bin_sizes=1):
+    def get_shannon_entropy(c, bin_sizes=1):
         c = c / np.sum(c)
         c = c[np.nonzero(c)]
 
@@ -37,9 +37,9 @@ class Histogram(Estimator):
         return H
 
     def estimate(self):
-        ys_freq, ys_hist = np.histogram(self.x, bins=self.bins)
-        bin_size = ys_hist[1] - ys_hist[0]
-        if bin_size == 0:
+        self.ys_freq, self.ys_hist = np.histogram(self.x, bins=self.bins)
+        self.bin_size = self.ys_hist[1] - self.ys_hist[0]
+        if self.bin_size == 0:
             return 0
 
-        return self.get_shannon_entropy(ys_freq, bin_size)
+        return Histogram.get_shannon_entropy(self.ys_freq, self.bin_size)

@@ -25,4 +25,4 @@ class Kernel(Estimator):
         r = kde.score_samples(self.x[:, np.newaxis])
         p_x = np.exp(r)
 
-        return self.get_shannon_entropy(p_x)
+        return Estimator.get_shannon_entropy(p_x)

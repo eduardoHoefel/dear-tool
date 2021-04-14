@@ -14,11 +14,30 @@ class Estimator():
     def analyse(self, real_value):
         self.review = EstimationAnalysis(self.output, real_value)
 
-    def get_shannon_entropy(self, c, bin_sizes=1):
+    def get_shannon_entropy(c, bin_sizes=1):
         c = c[np.nonzero(c)]
         H = -np.mean(np.log2(c))
 
         return H
+
+    def get_mutual_information(p_k, p_l, p_k_l):
+        h_k = self.get_shannon_entropy(p_k)
+        h_l = self.get_shannon_entropy(p_l)
+        h_kl = self.get_shannon_entropy(p_kl)
+
+        H = h_k + h_l - h_kl
+
+        return H
+
+
+
+
+
+
+
+
+
+
 
     def get_sort_value(self, key):
         if key == 'name':

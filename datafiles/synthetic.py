@@ -12,7 +12,8 @@ class SyntheticDatafile(Datafile):
 
     def __init__(self, m, s, samples):
         f = sc.norm.pdf
-        super().__init__(SyntheticDatafile.generate_data(m, s, samples), m, s, f)
+        d = SyntheticDatafile.generate_data(m, s, samples)
+        super().__init__(d, m, s, f)
         self.set_density(KnownFormula(self).estimate())
 
     def __str__(self):

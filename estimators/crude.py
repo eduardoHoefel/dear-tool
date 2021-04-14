@@ -25,4 +25,4 @@ class Crude(Estimator):
         true_std_deviation = np.std(self.x)
 
         p_x = sc.stats.norm.pdf(self.x, true_mean, true_std_deviation)
-        return self.get_shannon_entropy(p_x)
+        return Estimator.get_shannon_entropy(p_x)

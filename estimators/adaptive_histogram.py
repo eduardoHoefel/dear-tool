@@ -79,4 +79,4 @@ class AdaptiveHistogram(Histogram):
         ys_hist[-1] = right_border - left_border
         ys_freq[-1] = len(bins[-1])
 
-        return self.get_shannon_entropy(ys_freq, ys_hist)
+        return Histogram.get_shannon_entropy(ys_freq, ys_hist)

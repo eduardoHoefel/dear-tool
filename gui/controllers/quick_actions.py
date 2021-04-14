@@ -5,7 +5,7 @@ import gui.objects.keys as Keys
 class QuickActionsMenu(WindowController):
 
     def __init__(self, window_provider, main_window):
-        title = "[q] Quit  [i] Import datafile [c] Create synthetic datafile"
+        title = "[q] Quit  [i] Import datafile"
         super().__init__(title, window_provider)
         self.main_window = main_window
 

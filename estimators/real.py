@@ -21,4 +21,4 @@ class Real(Estimator):
 
     def estimate(self):
         p_x = sc.stats.norm.pdf(self.x, self.m, self.s)
-        return self.get_shannon_entropy(p_x)
+        return Estimator.get_shannon_entropy(p_x)

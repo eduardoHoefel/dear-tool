@@ -55,4 +55,4 @@ class NN(Estimator):
         distances, indices = nbrs.kneighbors(self.data[:, np.newaxis])
 
         p_x = np.array([x[-1] for x in distances])
-        return self.get_shannon_entropy(p_x)
+        return Estimator.get_shannon_entropy(p_x)
