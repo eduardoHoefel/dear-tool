@@ -1,5 +1,4 @@
 from gui.objects.documents.document import Document, Word, DocumentLine, NewLine, Result
-from estimators.analysis import EstimationAnalysis
 
 def report_line(title, result):
     tword = Word(title, {'align': 'left'})
@@ -14,10 +13,6 @@ class DensityEstimationResultDocument(Document):
         text_parts = []
 
         datafile = estimator.datafile
-        if datafile.m is not None:
-            text_parts.append(report_line("Known mean: ", datafile.m))
-        if datafile.s is not None:
-            text_parts.append(report_line("Known std deviation: ", datafile.s))
         if datafile.density is not None:
             text_parts.append(report_line("Known density: ", datafile.density))
 

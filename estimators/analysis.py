@@ -13,7 +13,13 @@ class EstimationAnalysis():
         self.raw = abs(self.real_value - self.estimation)
         self.relative = self.raw/self.real_value
         if self.relative == 0:
-            self.score = "Perfect"
+            self.score = 100
         else:
-            self.score =  -int(np.log2(self.relative))
+            try:
+                self.score =  max(0, -int(np.log2(self.relative)))
+            except:
+                self.score =  0
+
+        if self.score is None:
+            self.score = 0
 

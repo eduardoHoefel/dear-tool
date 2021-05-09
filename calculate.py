@@ -1,4 +1,6 @@
 import numpy as np
+from statistics import mean, stdev
+import math
 
 class Calculate():
 
@@ -33,3 +35,13 @@ class Calculate():
             return -int(np.log2(1 - (min(v) / max(v))))
 
         return Calculate.score(base, e)
+
+    def stats(data):
+        s = {}
+        s['min'] = min(data)
+        s['max'] = max(data)
+        s['avg'] = mean(data)
+        s['dev'] = 0 if len(data) == 1 else stdev(data)
+        s['data'] = data
+
+        return s

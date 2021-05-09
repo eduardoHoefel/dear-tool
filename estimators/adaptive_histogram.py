@@ -10,17 +10,23 @@ class AdaptiveHistogram(Histogram):
     def get_parameters():
         return ['population_method', 'bin_population']
 
+    def get_default_experiment_parameters(datafile):
+        auto = AdaptiveHistogram(datafile)
+        return {'bin_population': {'from': 1, 'to': datafile.samples/2, 'step': 1}, 'auto': auto}
+
     def __init__(self, datafile, parameters={}):
         super().__init__(datafile, parameters)
-        default = 'auto'
 
         self.x = datafile.data
         self.choose_method(parameters)
-        self.name = "AH({})".format(str(self.bin_population).rjust(5))
-        self.name = "AH({} [{}])".format(str(self.bin_population).rjust(5), "AUTO" if self.bin_population == self.get_auto_bin_population() else "MANUAL")
+        self.id = "AH({})".format(str(self.bin_population).rjust(5))
+        self.auto = self.bin_population == (parameters['auto'] if 'auto' in parameters.keys() else self.get_auto_bin_population())
+        self.name = "AH({} [{}])".format(str(self.bin_population).rjust(5), "AUTO" if self.auto else "MANUAL")
+        self.plot_name_short = str(self.bin_population)
+        self.plot_name_full = self.id
 
     def choose_method(self, parameters):
-        self.method = parameters['population_method'] if 'population_method' in parameters else 'default'
+        self.method = parameters['population_method'] if 'population_method' in parameters.keys() else 'default'
         self.calculate_population(parameters)
 
     def get_auto_bin_population(self):
@@ -35,7 +41,7 @@ class AdaptiveHistogram(Histogram):
         
     def calculate_population(self, parameters):
         if self.method == 'default':
-            self.method = 'manual' if 'bin_population' in parameters and parameters['bin_population'] is not None else 'auto'
+            self.method = 'manual' if 'bin_population' in parameters.keys() and parameters['bin_population'] is not None else 'auto'
 
         if self.method == 'auto':
             self.bin_population = self.get_auto_bin_population()
@@ -45,13 +51,20 @@ class AdaptiveHistogram(Histogram):
         self.calculate_bins()
 
     def calculate_bins(self):
-        self.bins = int(len(self.x) / self.bin_population)
+        if self.bin_population <= 0:
+            self.bins = 0
+        else:
+            self.bins = int(len(self.x) / self.bin_population)
 
     def estimate(self):
+        if self.bins <= 0:
+            return 0
+
         self.x.sort()
 
         ys_freq = np.zeros(self.bins)
-        ys_hist = np.zeros(self.bins)
+        widths = np.zeros(self.bins)
+        ys_hist = np.zeros(self.bins+1)
 
         bins = []
 
@@ -63,20 +76,27 @@ class AdaptiveHistogram(Histogram):
                 bins.append(cur_bin)
                 cur_bin = []
 
-        last_border = min(bins[0])
+        
+        last_border = min(bins[0]) - np.std(self.x)
+        ys_hist[0] = last_border
         for i in range(len(bins)-1):
             b_left = bins[i]
             b_right = bins[i+1]
             left_border = last_border
             right_border = np.mean([max(b_left), min(b_right)])
-            ys_hist[i] = right_border - left_border
+            widths[i] = right_border - left_border
             ys_freq[i] = len(bins[i])
-
+            ys_hist[i+1] = right_border
             last_border = right_border
 
         left_border = last_border
-        right_border = max(bins[-1])
-        ys_hist[-1] = right_border - left_border
+        right_border = max(bins[-1]) + np.std(self.x)
+        widths[-1] = right_border - left_border
         ys_freq[-1] = len(bins[-1])
+        ys_hist[-1] = right_border
 
-        return Histogram.get_shannon_entropy(ys_freq, ys_hist)
+        self.ys_freq = ys_freq
+        self.ys_hist = ys_hist
+        self.bin_widths = widths
+
+        return Histogram.get_shannon_entropy(ys_freq, widths)

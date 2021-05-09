@@ -49,8 +49,9 @@ class EstimatorController(WindowController):
             return options
 
 
-        estimator_select = Section("Estimator", Select(True, get_estimator_options))
-        self.form.add_element('estimator', estimator_select)
+        estimator_select = Select(True, get_estimator_options)
+        estimator_section = Section("Estimator", estimator_select)
+        self.form.add_element('estimator', estimator_section)
         self.form.add_element('break1', SectionBreak())
 
         parameters = estimators.get_all_inputs(datafile_select)
@@ -65,11 +66,10 @@ class EstimatorController(WindowController):
 
             if new_value is not None:
                 for p in new_value.get_parameters():
-                    parameters[p].show()
-                    parameters[p].reset()
                     parameters[p].changed()
+                    parameters[p].show()
 
-        estimator_select.inp.on_change(on_estimator_change)
+        estimator_select.on_change(on_estimator_change)
         on_estimator_change(None, None)
 
         cancel = self.form.get_button('cancel', "Cancel", self.remove)

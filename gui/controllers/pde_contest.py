@@ -16,6 +16,7 @@ from executors.executable import RepeatedExperimentExecutor
 from gui.controllers.execution import ExecutionController
 
 from datatypes import nfloat, nint, pfloat, pint
+from datafiles.distribution import param_map
 
 import log
 
@@ -30,14 +31,46 @@ class PDEContestController(WindowController):
 
         self.form = FormController(window_provider)
 
-        self.form.add_element('samples', RangeSection('Synthetic samples', Input(True, pint, 1000), Input(True, pint, 10000)))
+        def dist_options_provider():
+            from datafiles.distribution import all_distributions
+            distributions = {}
 
-        mean_input = Section("Mean", Input(True, float, -2))
-        self.form.add_element('mean', mean_input)
+            for d in all_distributions:
+                distributions[d] = d
 
-        std_input = Section("Standant deviation", Input(True, pint, 2))
-        self.form.add_element('std', std_input)
+            return distributions
+
+        dist_select = Select(True, dist_options_provider)
+        dist_section = Section("Distribution", dist_select)
+
+        self.form.add_element('dist', dist_section)
+        self.form.add_element('samples', RangeSection('Samples', Input(True, pint, 1000), Input(True, pint, 10000)))
+        self.form.add_element('break1', SectionBreak())
+
+        all_params = {}
+
+        for dist, params in param_map.items():
+            for p in params:
+                if p not in all_params.keys():
+                    inp = Input(True, myfloat, 1)
+                    self.form.add_element(p, Section(p, inp))
+                    all_params[p] = inp
+
         self.form.add_element('break2', SectionBreak())
+        self.form.add_element('loc', Section("Mean", Input(True, myfloat, 0)))
+        self.form.add_element('scale', Section("Standard deviation", Input(True, nfloat, 2)))
+
+        def on_dist_change(old_value, new_value, is_valid=True):
+            for inp in all_params.values():
+                    inp.disappear()
+
+            if new_value is not None:
+                for p in param_map[new_value]:
+                    all_params[p].changed()
+                    all_params[p].show()
+
+        dist_select.on_change(on_dist_change)
+        on_dist_change(None, None)
 
         estimator_select = Section("Estimator", Select(True, {'all': "All"}, 0))
         self.form.add_element('estimator', estimator_select)
@@ -64,9 +97,12 @@ class PDEContestController(WindowController):
         data = self.form.get_data()
 
         samples = data['samples']
-        m = data['mean']
-        s = data['std']
-        datafile_parameters = {'m': m, 's': s, 'samples': samples}
+        dist = data['dist']
+        dist_params = [data[x] for x in param_map[dist]]
+        loc = data['loc']
+        scale = data['scale']
+        samples = data['samples']
+        datafile_parameters = {'loc': loc, 'scale': scale, 'samples': samples, 'dist': dist, 'dist_params': dist_params}
 
         EstimatorClass = data['estimator']
         estimator_parameters = data

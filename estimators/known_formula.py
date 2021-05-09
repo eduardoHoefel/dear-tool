@@ -2,8 +2,8 @@ import numpy as np
 import scipy as sc
 from estimators.estimator import Estimator
 
-def create_g_log(f, x, m, s):
-    g = lambda x:f(x, m, s)
+def create_g_log(f, x, pdf_params):
+    g = lambda x:f(x, *pdf_params)
 
     def g_log(x):
         temp = g(x)
@@ -27,11 +27,10 @@ class KnownFormula(Estimator):
         super().__init__(datafile, parameters)
 
         x = datafile.data
-        f = datafile.f
-        m = datafile.m
-        s = datafile.s
+        pdf = datafile.pdf
+        pdf_params = datafile.pdf_params
 
-        self.g_log = create_g_log(f, x, m, s)
+        self.g_log = create_g_log(pdf, x, pdf_params)
         self.name = "known"
         self.id = self.name
 

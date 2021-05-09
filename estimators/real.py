@@ -16,9 +16,10 @@ class Real(Estimator):
         self.x = datafile.data
         self.m = datafile.m
         self.s = datafile.s
+        self.f = datafile.f
         self.id = 'true'
         self.name = self.id
 
     def estimate(self):
-        p_x = sc.stats.norm.pdf(self.x, self.m, self.s)
+        p_x = self.f(self.x, self.m, self.s)
         return Estimator.get_shannon_entropy(p_x)

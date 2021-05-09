@@ -1,12 +1,11 @@
 
 class Datafile():
 
-    def __init__(self, data, m=None, s=None, f=None):
+    def __init__(self, data, pdf, pdf_params):
         self.data = data
         self.samples = len(data)
-        self.m = m
-        self.s = s
-        self.f = f
+        self.pdf = pdf
+        self.pdf_params = pdf_params
         self.density = None
 
     def get_data(self):
@@ -17,7 +16,7 @@ class Datafile():
 
     def split(self, samples):
         data2 = self.data[:samples]
-        datafile = Datafile(data2, self.m, self.s, self.f)
+        datafile = Datafile(data2, self.pdf, self.pdf_params)
         datafile.set_density(self.density)
         return datafile
 

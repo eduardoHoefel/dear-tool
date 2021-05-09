@@ -33,3 +33,9 @@ def pint(value):
 '''natural int'''
 def nint(value):
     return natural(myint(value))
+
+'''none int'''
+def nonenint(value):
+    if value is None or value == '' or value == "None":
+        return ''
+    return natural(myint(value))

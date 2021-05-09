@@ -18,15 +18,21 @@ class RepeatedExperiment():
 
     def prepare(self):
         self.experiments = {}
-        m = self.datafile_parameters['m']
-        s = self.datafile_parameters['s']
+        dist = self.datafile_parameters['dist']
+        dist_params = self.datafile_parameters['dist_params']
+        loc = self.datafile_parameters['loc']
+        scale = self.datafile_parameters['scale']
         samples = self.datafile_parameters['samples']
 
         for i in range(self.iterations):
-            datafile = SyntheticDatafile(m, s, samples)
+            datafile = SyntheticDatafile(dist, dist_params, loc, scale, samples)
             e = Experiment(self.EstimatorClass, datafile, self.estimator_parameters)
             e.prepare()
             self.experiments[e.get_name()] = e
+
+    def get_experiment_example(self):
+        first_experiment = list(self.experiments.values())[0]
+        return first_experiment
 
     def get_estimator_keys(self):
         first_experiment = list(self.experiments.values())[0]
@@ -38,7 +44,7 @@ class RepeatedExperiment():
         return [samples for x in self.experiments.keys()]
 
     def compute_statistics(self):
-        self.real_value = list(self.experiments.values())[0].real_value
+        self.real_value = list(self.experiments.values())[-1].real_value
 
         estimators = self.get_estimator_keys()
         self.results = {}

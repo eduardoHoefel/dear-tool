@@ -22,9 +22,12 @@ class PDEContest(RepeatedExperiment):
 
     def prepare(self):
         self.experiments = {}
-        m = self.datafile_parameters['m']
-        s = self.datafile_parameters['s']
-        original_datafile = SyntheticDatafile(m, s, self.samples_end)
+        dist = self.datafile_parameters['dist']
+        dist_params = self.datafile_parameters['dist_params']
+        loc = self.datafile_parameters['loc']
+        scale = self.datafile_parameters['scale']
+        samples = self.datafile_parameters['samples']
+        original_datafile = SyntheticDatafile(dist, dist_params, loc, scale, samples)
 
         for i in range(self.iterations):
             samples = self.samples_start + self.samples_steps*i

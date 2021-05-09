@@ -15,10 +15,6 @@ class ExperimentResultDocument(Document):
         text_parts = []
 
         datafile = experiment.estimators[list(experiment.estimators.keys())[0]].datafile
-        if datafile.m is not None:
-            text_parts.append(report_line("Known mean: ", datafile.m))
-        if datafile.s is not None:
-            text_parts.append(report_line("Known std deviation: ", datafile.s))
         if datafile.density is not None:
             text_parts.append(report_line("Known density: ", datafile.density))
 
@@ -40,8 +36,7 @@ class ExperimentResultDocument(Document):
 
         for i in range(len(estimations)):
             e = estimations[i]
-            name = e.name
-            table.add_row([Word(str(i+1).rjust(len(str(len(estimations))))), Link(e.name, e.name, self.open), Result(e.output), Word(e.review.score)])
+            table.add_row([Word(str(i+1).rjust(len(str(len(estimations))))), Link(e.name, e.id, self.open), Result(e.output), Word(e.review.score)])
 
         text_parts += table.get_lines()
 

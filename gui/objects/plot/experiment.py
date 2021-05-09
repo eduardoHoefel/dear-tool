@@ -11,16 +11,13 @@ class ExperimentPlotDataController(PlotDataController):
         return {'estimator': "Estimator"}
 
     def get_y_axis_options(self):
-        return {'result': "Result"}
+        return {'result': "Result", 'score': "Score"}
 
-    def get_x_axis_tick_labels(self, x):
-        if x == 'estimator':
-            return [e.name for e in self.experiment.estimators.values()]
-        return ['']
-
-    def get_lines(self, y):
+    def get_lines(self, y, style):
         lines = {}
         estimators = self.experiment.get_estimator_keys()
+        estimator_names = [float(x) for x in self.experiment.get_estimator_names()]
+
         lines_data = []
         auto_estimator_lines = []
         auto_estimator = False
@@ -29,30 +26,32 @@ class ExperimentPlotDataController(PlotDataController):
             data = ''
             if y == 'result':
                 data = e.review.estimation
+            if y == 'score':
+                data = e.review.score
 
             if "AUTO" in e.name:
                 auto_estimator_lines.append(data)
-                lines_data.append(None)
+                lines_data.append(0 if style == "bars" else None)
                 auto_estimator = True
             else:
                 lines_data.append(data)
-                auto_estimator_lines.append(None)
+                auto_estimator_lines.append(0 if style == "bars" else None)
 
-        lines["Estimations"] = (estimators, lines_data)
+        lines["Estimations"] = (estimator_names, lines_data)
         if auto_estimator:
-            lines["Auto parameter"] = (estimators, auto_estimator_lines)
+            lines["Auto parameter"] = (estimator_names, auto_estimator_lines)
 
 
         return lines
 
     def prepare(self, x, y, style):
-        for line_label, line in self.get_lines(y).items():
+        for line_label, line in self.get_lines(y, style).items():
             labels, data = line
 
             self.add_data(labels, data, line_label, style)
 
         if y == 'result':
             real = [self.experiment.real_value for x in labels]
-            self.add_data(labels, real, "Real value", 'lines')
+            self.add_data(labels, real, "Real value", 'real')
 
     

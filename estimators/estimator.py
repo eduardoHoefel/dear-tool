@@ -9,7 +9,8 @@ class Estimator():
         self.output = None
 
     def run(self):
-        self.output = self.estimate()
+        if self.output is None:
+            self.output = self.estimate()
 
     def analyse(self, real_value):
         self.review = EstimationAnalysis(self.output, real_value)
@@ -29,16 +30,6 @@ class Estimator():
 
         return H
 
-
-
-
-
-
-
-
-
-
-
     def get_sort_value(self, key):
         if key == 'name':
             return self.name
@@ -53,9 +44,6 @@ class Estimator():
             return self.review.raw
 
         return self.name
-
-    def estimate(self):
-        return 0
 
     def get_parameter_range(E, parameter, datafile, window):
         expected = datafile.density
@@ -80,3 +68,8 @@ class Estimator():
             last_density = r
             left = right
 
+    def estimate(self):
+        return 0
+
+    def pde(self, x):
+        return 0

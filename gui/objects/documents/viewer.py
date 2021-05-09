@@ -1,5 +1,4 @@
 from gui.controllers.window_controller import WindowController
-from estimators.analysis import EstimationAnalysis
 from gui.objects.cursors.vlist import VListCursor
 from gui.window import Renderer
 from gui.form.form_object import FormObject

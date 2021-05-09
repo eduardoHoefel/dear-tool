@@ -1,6 +1,7 @@
 from gui.controllers.window_controller import WindowController
 from gui.form.controller import FormController
 
+from gui.form.select import Select
 from gui.form.input import Input
 from gui.form.section import Section
 from gui.form.double_section import DoubleSection
@@ -14,6 +15,7 @@ from estimators.real import Real
 from datafiles.synthetic import SyntheticDatafile
 
 from datatypes import myfloat, nfloat
+from datafiles.distribution import param_map
 
 import log
 
@@ -28,9 +30,46 @@ class CreateSyntheticDatafileController(WindowController):
 
         self.form = FormController(window_provider)
 
+        def dist_options_provider():
+            from datafiles.distribution import all_distributions
+            distributions = {}
+
+            for d in all_distributions:
+                distributions[d] = d
+
+            return distributions
+
+        dist_select = Select(True, dist_options_provider)
+        dist_section = Section("Distribution", dist_select)
+
+        self.form.add_element('dist', dist_section)
         self.form.add_element('samples', Section("Samples", Input(True, int, 1500)))
-        self.form.add_element('m', Section("Mean", Input(True, myfloat, -2)))
-        self.form.add_element('s', Section("Standard deviation", Input(True, nfloat, 2)))
+        self.form.add_element('break1', SectionBreak())
+
+        all_params = {}
+
+        for dist, params in param_map.items():
+            for p in params:
+                if p not in all_params.keys():
+                    inp = Input(True, myfloat, 1)
+                    self.form.add_element(p, Section(p, inp))
+                    all_params[p] = inp
+
+        self.form.add_element('break2', SectionBreak())
+        self.form.add_element('loc', Section("Mean", Input(True, myfloat, 0)))
+        self.form.add_element('scale', Section("Standard deviation", Input(True, nfloat, 2)))
+
+        def on_dist_change(old_value, new_value, is_valid=True):
+            for inp in all_params.values():
+                    inp.disappear()
+
+            if new_value is not None:
+                for p in param_map[new_value]:
+                    all_params[p].changed()
+                    all_params[p].show()
+
+        dist_select.on_change(on_dist_change)
+        on_dist_change(None, None)
 
         self.submitted = False
 
@@ -57,13 +96,16 @@ class CreateSyntheticDatafileController(WindowController):
 
         self.submitted = True
 
-        m = data['m']
-        s = data['s']
+        dist = data['dist']
+        dist_params = [data[x] for x in param_map[dist]]
+        loc = data['loc']
+        scale = data['scale']
         samples = data['samples']
         datafiles = self.s.get('datafiles')
         if datafiles is None:
             datafiles = []
 
-        datafiles.append(SyntheticDatafile(m, s, samples))
+        seed = self.s.get('seed')
+        datafiles.append(SyntheticDatafile(dist, dist_params, loc, scale, samples, seed))
         self.s.set('datafiles', datafiles)
         self.remove()

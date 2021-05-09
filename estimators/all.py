@@ -33,14 +33,14 @@ def get_all_input_names():
 
 def get_all_inputs(datafile_select):
     parameters = {}
-    parameters['population_method'] = Select(True, {'manual': "Manual", 'auto': "Auto"}, 0)
-    parameters['bins_method'] = Select(True, {'manual': "Manual", 'auto': "Auto", 'fd': "Freedman Diacosis", 'doane': "Doane", 'scott': "Scott", 'stone': "Stone", 'rice': "Rice", 'sturges': "Sturges", 'sqrt': "Square root"}, 0)
-    parameters['neighbors_method'] = Select(True, {'manual': "Manual", 'auto': "Auto"}, 0)
+    parameters['population_method'] = Select(True, {'auto': "Auto", 'manual': "Manual"}, 0)
+    parameters['bins_method'] = Select(True, {'auto': "Auto", 'fd': "Freedman Diacosis", 'doane': "Doane", 'scott': "Scott", 'stone': "Stone", 'rice': "Rice", 'sturges': "Sturges", 'sqrt': "Square root", 'manual': "Manual"}, 0)
+    parameters['neighbors_method'] = Select(True, {'auto': "Auto", 'manual': "Manual"}, 0)
     parameters['bins'] = Input(False, nint, 9)
     parameters['bin_population'] = Input(False, nfloat, 9)
     parameters['neighbors'] = Input(False, nfloat, 9)
     parameters['kernel'] = Select(True, {'gaussian': "Gaussian"})
-    parameters['bandwidth'] = Input(True, pfloat, 0.4)
+    parameters['bandwidth'] = Input(True, pfloat, "1.0")
     
     def on_bins_method_change(old_value, new_value, is_valid):
         if new_value == "manual":
