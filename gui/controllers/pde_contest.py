@@ -15,7 +15,7 @@ from pde_contest import PDEContest
 from executors.executable import RepeatedExperimentExecutor
 from gui.controllers.execution import ExecutionController
 
-from datatypes import nfloat, nint, pfloat, pint
+from datatypes import nfloat, nint, pfloat, pint, myfloat
 from datafiles.distribution import param_map
 
 import log

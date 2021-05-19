@@ -18,7 +18,7 @@ class Histogram(Estimator):
 
         self.x = datafile.data
         self.bins_method = parameters['bins_method'] if 'bins_method' in parameters.keys() else 'default'
-        self.bins = 'auto' if self.bins_method == 'default' else parameters['bins'] if self.bins_method == 'manual' else self.bins_method
+        self.bins = 'auto' if self.bins_method == 'default' and 'bins' not in parameters.keys() else parameters['bins'] if self.bins_method == 'manual' or ('bins' in parameters.keys() and parameters['bins'] is not None) else self.bins_method
         if self.bins == 'auto':
             self.bins = self.get_auto_bins()
 

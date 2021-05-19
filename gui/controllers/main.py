@@ -14,7 +14,7 @@ class MainMenu(WindowController):
 
         super().__init__(title, window_provider, window_render_options={'merge_top_borders': True, 'color': Colors.BIG_TITLE})
         self.menu = Menu()
-        self.menu.add_option('d', 'Density estimator', self.estimator)
+        self.menu.add_option('d', 'Density estimation', self.estimator)
         self.menu.add_option('e', 'Experiment', self.experiment)
         self.menu.add_option('r', 'Repeated experiment analysis', self.repeated_experiment_analysis)
         self.menu.add_option('p', 'PDE contest', self.pde_contest)

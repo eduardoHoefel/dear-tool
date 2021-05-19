@@ -12,7 +12,7 @@ from gui.form.select import Select
 from datatypes import nfloat, nint, pfloat
 
 def get_all():
-    return [NN, AdaptiveHistogram, Histogram, Kernel]
+    return [Histogram, AdaptiveHistogram, Kernel, NN]
 
 def get_all_input_names():
     input_names = {}

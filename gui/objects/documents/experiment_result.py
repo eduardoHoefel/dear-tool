@@ -16,7 +16,7 @@ class ExperimentResultDocument(Document):
 
         datafile = experiment.estimators[list(experiment.estimators.keys())[0]].datafile
         if datafile.density is not None:
-            text_parts.append(report_line("Known density: ", datafile.density))
+            text_parts.append(report_line("Known Shannon entropy: ", datafile.density))
 
         text_parts.append(NewLine())
         text_parts.append(Word("Estimations: ", {'align': 'center'}))
